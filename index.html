@@ -1142,17 +1142,24 @@ $("#openData").addEventListener("click", openData);
 // read again on open, every 30 minutes, and whenever the app comes back to the front.
 const LINK_KEY = "tutor-desk-cal-link-v1";
 const SYNC_EVERY = 30 * 60 * 1000;
-let calLink = "", syncState = { at: null, error: "" }, syncing = false;
-try { const v = JSON.parse(localStorage.getItem(LINK_KEY) || "null"); if (v) { calLink = v.link || ""; syncState = v.state || syncState; } } catch (e) {}
-const saveLink = () => { try { localStorage.setItem(LINK_KEY, JSON.stringify({ link: calLink, state: syncState })); } catch (e) {} };
+// Outlook won't let the browser read the link directly, so it goes through the
+// user's own Cloudflare Worker (relay/worker.js) when a relay address is set.
+let calLink = "", relay = "", syncState = { at: null, error: "" }, syncing = false;
+try { const v = JSON.parse(localStorage.getItem(LINK_KEY) || "null"); if (v) { calLink = v.link || ""; relay = v.relay || ""; syncState = v.state || syncState; } } catch (e) {}
+const saveLink = () => { try { localStorage.setItem(LINK_KEY, JSON.stringify({ link: calLink, relay, state: syncState })); } catch (e) {} };
 const normLink = u => String(u || "").trim().replace(/^webcals?:\/\//i, "https://");
 
 async function syncCalendar(manual) {
   if (!calLink || syncing) return;
   syncing = true;
   try {
-    const r = await fetch(calLink, { cache: "no-store", credentials: "omit" });
-    if (!r.ok) throw new Error(`The calendar link answered with error ${r.status}. Check that the calendar is still published.`);
+    const r = relay
+      ? await fetch(relay, { method: "POST", cache: "no-store", credentials: "omit", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: calLink }) })
+      : await fetch(calLink, { cache: "no-store", credentials: "omit" });
+    if (!r.ok) {
+      const why = relay ? (await r.text().catch(() => "")).slice(0, 120) : "";
+      throw new Error(`The calendar ${relay ? "relay" : "link"} answered with error ${r.status}${why ? ": " + why : ""}. Check that the calendar is still published.`);
+    }
     const text = await r.text();
     if (!/BEGIN:VCALENDAR/.test(text)) throw new Error("That link doesn't return a calendar. Use the ICS link (ending in .ics), not the HTML one.");
     const info = importICS(text, "Outlook (auto sync)");
@@ -1179,7 +1186,9 @@ function openCal() {
   const upcoming = meetings.filter(m => at(m.date, m.end) > new Date()).length;
   const when = d => new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   let status;
-  if (calLink && syncState.error === "blocked") status = `<b>Outlook blocked the automatic read.</b> Your calendar link is saved, but Outlook doesn't let other websites read it directly. Ask me in Claude to set up the relay so sync works; until then, use the file option below.`;
+  if (calLink && syncState.error === "blocked") status = relay
+    ? `<b>The relay couldn't be reached.</b> Check the relay address below, and that the worker is deployed.`
+    : `<b>Outlook blocked the automatic read.</b> Your calendar link is saved. Add your relay address below so sync can work; until then, use the file option.`;
   else if (calLink && syncState.error) status = `<b>Last sync failed:</b> ${esc(syncState.error)}`;
   else if (calLink && syncState.at) status = `<b>Auto sync is on.</b> Last synced ${when(syncState.at)}: ${info ? info.count : 0} meetings, ${upcoming} still to come. Syncs every 30 minutes while the app is open.`;
   else if (info) status = `<b>${info.count} meetings</b> loaded from <span class="mono">${esc(info.file)}</span> on ${when(info.at)}. ${upcoming} still to come.`;
@@ -1193,6 +1202,8 @@ function openCal() {
       <fieldset><legend>Automatic sync</legend>
         <label class="field"><span class="label">Outlook calendar link (ICS)</span>
           <input id="calLink" value="${esc(calLink)}" placeholder="https://outlook.office365.com/owa/calendar/.../calendar.ics" spellcheck="false"></label>
+        <label class="field"><span class="label">Relay address (your Cloudflare Worker)</span>
+          <input id="relayUrl" value="${esc(relay)}" placeholder="https://tutor-desk-relay.your-name.workers.dev" spellcheck="false"></label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn primary" data-act="saveLink">${calLink ? "Save and sync now" : "Turn on auto sync"}</button>
           ${calLink ? `<button class="btn" data-act="unlink">Stop auto sync</button>` : ""}
@@ -1243,7 +1254,9 @@ $("#calDlg").addEventListener("click", e => {
   if (b.dataset.act === "saveLink") {
     const v = normLink($("#calLink").value);
     if (!/^https:\/\/\S+$/i.test(v)) { toast("Paste the full ICS link, starting with https://"); return; }
-    calLink = v; syncState = { at: null, error: "" }; saveLink();
+    const rv = String($("#relayUrl").value || "").trim().replace(/\/+$/, "");
+    if (rv && !/^https:\/\/\S+$/i.test(rv)) { toast("The relay address should start with https://"); return; }
+    calLink = v; relay = rv; syncState = { at: null, error: "" }; saveLink();
     b.textContent = "Syncing\u2026"; b.disabled = true;
     syncCalendar(true);
     return;
