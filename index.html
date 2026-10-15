@@ -248,6 +248,10 @@ legend{font-family:var(--display);font-weight:700;padding:0 6px}
 @media (max-width:420px){ .courses{grid-template-columns:1fr} .wrap{padding-inline:16px} .brand h1{font-size:26px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 body{margin:0}
+.tag.clash{background:var(--bad-soft);color:var(--bad)}
+.drop{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;border:2px dashed var(--line);border-radius:12px;padding:26px 16px;cursor:pointer;background:var(--sunk)}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--soft)}
+details summary{cursor:pointer}
 img{max-width:100%}
 /* mini window: only the next class and today's list */
 .mini-toggle #openFull{display:none}
@@ -282,6 +286,7 @@ img{max-width:100%}
     <div class="actions" id="editActions">
       <button class="btn primary" id="addCourse">+ Add course</button>
       <button class="btn" id="openTerm">Term dates</button>
+      <button class="btn" id="openCal">Meetings calendar</button>
       <button class="btn" id="openData">Import / export</button>
     </div>
   </header>
@@ -304,6 +309,7 @@ img{max-width:100%}
 <dialog id="courseDlg"></dialog>
 <dialog id="termDlg"></dialog>
 <dialog id="dataDlg"></dialog>
+<dialog id="calDlg"></dialog>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -357,15 +363,168 @@ function parseWeeks(str, max) {
 }
 
 // ---------- data ----------
+// Meetings imported from an email calendar live in this browser only, shown as one virtual course.
+const MEET = { id: "__meet", code: "MEET", title: "Meetings", role: "meet", color: "c5", groups: [], links: [], pageUrl: "", virtual: true };
+const MEET_KEY = "tutor-desk-meetings-v1";
+let meetings = [], meetingsInfo = null;
+function loadMeetings() { try { const v = JSON.parse(localStorage.getItem(MEET_KEY) || "null"); if (v) { meetings = v.events || []; meetingsInfo = v.info || null; } } catch (e) {} }
+function saveMeetings() { try { localStorage.setItem(MEET_KEY, JSON.stringify({ events: meetings, info: meetingsInfo })); } catch (e) { toast("Couldn't save meetings in this browser."); } }
+const isMeet = s => s.course && s.course.id === MEET.id;
+const titleOf = s => s.title || s.course.title;
+
 function allSessions() {
   const list = [];
-  courses.forEach(c => (c.sessions || []).forEach(s => {
+  const add = (c, s) => {
     if (!s.date) return;
     const g = (c.groups || []).find(g => g.id === s.group);
     const startAt = at(s.date, s.start), endAt = at(s.date, s.end || s.start);
     list.push({ ...s, course: c, groupObj: g, startAt, endAt, mins: Math.max(0, Math.round((endAt - startAt) / 60000)), week: weekOfDate(parseD(s.date)), month: s.date.slice(0, 7) });
-  }));
-  return list.sort((a,b) => a.startAt - b.startAt);
+  };
+  courses.forEach(c => (c.sessions || []).forEach(s => add(c, s)));
+  meetings.forEach(m => add(MEET, m));
+  list.sort((a,b) => a.startAt - b.startAt);
+  // clashes: any two live items that overlap in time
+  const live = list.filter(s => s.status !== "cancelled");
+  for (let i = 0; i < live.length; i++) {
+    for (let j = i + 1; j < live.length && live[j].startAt < live[i].endAt; j++) {
+      if (live[j].endAt > live[i].startAt) { live[i].clash = true; live[j].clash = true; }
+    }
+  }
+  return list;
+}
+const clashTag = s => s.clash ? ` <span class="tag clash">Clash</span>` : "";
+
+// ---------- calendar (.ics) import ----------
+const WIN_TZ = { "GMT Standard Time": "Europe/London", "UTC": "UTC", "Coordinated Universal Time": "UTC", "W. Europe Standard Time": "Europe/Berlin",
+  "Romance Standard Time": "Europe/Paris", "Central Europe Standard Time": "Europe/Budapest", "Central European Standard Time": "Europe/Warsaw",
+  "Iran Standard Time": "Asia/Tehran", "Eastern Standard Time": "America/New_York", "Pacific Standard Time": "America/Los_Angeles", "Arabian Standard Time": "Asia/Dubai" };
+
+function zoned(y, mo, d, h, mi, s, tz) {
+  const guess = Date.UTC(y, mo, d, h, mi, s);
+  try {
+    const f = new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const p = Object.fromEntries(f.formatToParts(new Date(guess)).map(x => [x.type, x.value]));
+    const asUTC = Date.UTC(+p.year, p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+    return new Date(guess - (asUTC - guess));
+  } catch (e) { return new Date(y, mo, d, h, mi, s); }
+}
+
+function icsDate(prop) {
+  if (!prop) return null;
+  const m = String(prop.value).trim().match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/);
+  if (!m) return null;
+  const [y, mo, d] = [+m[1], m[2] - 1, +m[3]];
+  if (!m[4]) return { d: new Date(y, mo, d), allDay: true };
+  const h = +m[4], mi = +m[5], s = +(m[6] || 0);
+  if (m[7]) return { d: new Date(Date.UTC(y, mo, d, h, mi, s)), allDay: false };
+  const tzid = prop.params && prop.params.TZID;
+  const tz = tzid ? (WIN_TZ[tzid] || (tzid.includes("/") ? tzid : null)) : null;
+  return { d: tz ? zoned(y, mo, d, h, mi, s, tz) : new Date(y, mo, d, h, mi, s), allDay: false };
+}
+
+function icsDuration(v) {
+  const m = String(v || "").match(/^-?P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/);
+  if (!m) return 0;
+  return ((+m[1] || 0) * 604800 + (+m[2] || 0) * 86400 + (+m[3] || 0) * 3600 + (+m[4] || 0) * 60 + (+m[5] || 0)) * 1000;
+}
+
+const icsText = v => String(v || "").replace(/\\n/gi, "\n").replace(/\\([,;\\])/g, "$1").trim();
+
+function parseICS(text) {
+  const lines = text.replace(/\r\n?/g, "\n").replace(/\n[ \t]/g, "").split("\n");
+  const events = []; let cur = null, depth = 0;
+  for (const line of lines) {
+    if (line === "BEGIN:VEVENT") { cur = {}; depth = 0; continue; }
+    if (line === "END:VEVENT") { if (cur) events.push(cur); cur = null; continue; }
+    if (!cur) continue;
+    if (line.startsWith("BEGIN:")) { depth++; continue; }   // skip VALARM etc.
+    if (line.startsWith("END:")) { depth--; continue; }
+    if (depth > 0) continue;
+    // split name;params:value at the first colon outside quotes
+    let q = false, i = -1;
+    for (let k = 0; k < line.length; k++) { const ch = line[k]; if (ch === '"') q = !q; else if (ch === ":" && !q) { i = k; break; } }
+    if (i < 0) continue;
+    const [name, ...ps] = line.slice(0, i).split(";");
+    const params = {};
+    ps.forEach(p => { const e = p.indexOf("="); if (e > 0) params[p.slice(0, e).toUpperCase()] = p.slice(e + 1).replace(/^"|"$/g, ""); });
+    const key = name.toUpperCase(), value = line.slice(i + 1);
+    if (key === "EXDATE") (cur.EXDATE = cur.EXDATE || []).push(...value.split(",").map(v => ({ value: v, params })));
+    else cur[key] = { value, params };
+  }
+  return events;
+}
+
+function expandRule(start, rule, until0, exset, from, to) {
+  const r = Object.fromEntries(rule.split(";").map(p => p.split("=")));
+  const interval = +r.INTERVAL || 1, count = r.COUNT ? +r.COUNT : Infinity;
+  const ud = r.UNTIL ? icsDate({ value: r.UNTIL, params: {} }) : null;
+  const until = ud ? (ud.allDay ? addDays(ud.d, 1) : ud.d) : null;
+  const out = []; let n = 0;
+  const take = d => {
+    if (until && d > until) return false;
+    if (n >= count || d > to) return false;
+    n++;
+    if (!exset.has(d.getTime()) && d >= from) out.push(d);
+    return true;
+  };
+  const setTime = d => { d.setHours(start.getHours(), start.getMinutes(), start.getSeconds(), 0); return d; };
+  if (r.FREQ === "WEEKLY") {
+    const days = (r.BYDAY ? r.BYDAY.split(",").map(x => ["MO","TU","WE","TH","FR","SA","SU"].indexOf(x.slice(-2))).filter(x => x >= 0) : [dow(start)]).sort();
+    let wk = addDays(start, -dow(start));
+    for (let guard = 0; guard < 1500; guard++) {
+      for (const dd of days) { const d = setTime(addDays(wk, dd)); if (d < start) continue; if (!take(d)) return out; }
+      wk = addDays(wk, 7 * interval);
+    }
+  } else if (r.FREQ === "DAILY") {
+    for (let d = new Date(start), g = 0; g < 3000; g++, d = setTime(addDays(d, interval))) if (!take(new Date(d))) return out;
+  } else if (r.FREQ === "MONTHLY" || r.FREQ === "YEARLY") {
+    const step = r.FREQ === "MONTHLY" ? interval : 12 * interval;
+    for (let g = 0; g < 600; g++) {
+      const d = new Date(start); d.setMonth(start.getMonth() + g * step);
+      if (d.getDate() !== start.getDate()) continue;   // e.g. the 31st in a short month
+      if (!take(d)) return out;
+    }
+  } else if (start >= from && start <= to) out.push(start);
+  return out;
+}
+
+function importICS(text, fileName) {
+  const raw = parseICS(text);
+  if (!raw.length) throw new Error("No events found in that file.");
+  const from = addDays(parseD(term.start), -7), to = addDays(parseD(term.start), (term.weeks + 6) * 7);
+  // instances moved or cancelled individually (RECURRENCE-ID) replace the series' own instance
+  const overridden = new Set();
+  raw.forEach(ev => { const rid = icsDate(ev["RECURRENCE-ID"]); if (rid && ev.UID) overridden.add(ev.UID.value + "|" + rid.d.getTime()); });
+  const out = new Map(); let allDay = 0, cancelled = 0;
+  const joinRe = /https:\/\/(?:teams\.microsoft\.com|teams\.live\.com|[\w.-]*zoom\.us|meet\.google\.com)[^\s<>"\\]*/i;
+  raw.forEach(ev => {
+    const st = icsDate(ev.DTSTART); if (!st) return;
+    if ((ev.STATUS && /CANCELLED/i.test(ev.STATUS.value)) || /^Canceled:|^Cancelled:/i.test(ev.SUMMARY ? ev.SUMMARY.value : "")) { cancelled++; return; }
+    if (st.allDay) { allDay++; return; }
+    const en = icsDate(ev.DTEND);
+    const dur = en ? en.d - st.d : (ev.DURATION ? icsDuration(ev.DURATION.value) : 3600000);
+    const uid = ev.UID ? ev.UID.value : Math.random().toString(36).slice(2);
+    const ex = new Set((ev.EXDATE || []).map(x => { const e = icsDate(x); return e ? e.d.getTime() : 0; }));
+    if (!ev["RECURRENCE-ID"]) overridden.forEach(k => { const [u, t] = k.split("|"); if (u === uid) ex.add(+t); });
+    const starts = ev.RRULE && !ev["RECURRENCE-ID"] ? expandRule(st.d, ev.RRULE.value, null, ex, from, to) : (st.d >= from && st.d <= to ? [st.d] : []);
+    const title = icsText(ev.SUMMARY && ev.SUMMARY.value) || "Meeting";
+    const location = icsText(ev.LOCATION && ev.LOCATION.value);
+    const teams = ev["X-MICROSOFT-SKYPETEAMSMEETINGURL"] ? ev["X-MICROSOFT-SKYPETEAMSMEETINGURL"].value : "";
+    const jm = (teams || location + " " + icsText(ev.DESCRIPTION && ev.DESCRIPTION.value)).match(joinRe);
+    starts.forEach(d => {
+      const e = new Date(d.getTime() + dur);
+      const sameDay = fmtD(e) === fmtD(d) || (e.getHours() === 0 && e.getMinutes() === 0 && fmtD(addDays(e, -1)) === fmtD(d));
+      const id = (uid.replace(/[^\w-]/g, "").slice(-24) || "m") + "-" + d.getTime();
+      out.set(id, { id, date: fmtD(d), start: hhmm(d), end: sameDay && !(e.getHours() === 0 && e.getMinutes() === 0) ? hhmm(e) : "23:59",
+        kind: "Meeting", title, location: location || "", joinUrl: jm ? jm[0] : "", status: "planned" });
+    });
+  });
+  // keep any Done/Cancelled marks from a previous import
+  const marks = Object.fromEntries(meetings.filter(m => m.status && m.status !== "planned").map(m => [m.id, m.status]));
+  meetings = [...out.values()].map(m => marks[m.id] ? { ...m, status: marks[m.id] } : m).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  meetingsInfo = { file: fileName || "calendar.ics", at: new Date().toISOString(), count: meetings.length, allDay, cancelled };
+  saveMeetings();
+  return meetingsInfo;
 }
 
 function sortedCourses() {
@@ -458,23 +617,24 @@ function renderNext(now) {
     const s = focus, c = s.course, r = splitRoom(s.location);
     const isToday = fmtD(s.startAt) === fmtD(now);
     const when = isToday ? "Today" : fmtD(s.startAt) === fmtD(addDays(now, 1)) ? "Tomorrow" : `${DAYS_LONG[dow(s.startAt)]} ${niceDate(s.startAt)}`;
-    const links = [];
+    const links = [], meet = isMeet(s);
+    if (s.joinUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(s.joinUrl))}" target="_blank" rel="noopener">Join meeting \u2197</a>`);
     if (c.pageUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Open on Myplace \u2197</a>`);
     if (s.groupObj && s.groupObj.link) links.push(`<a class="btn small" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">${esc(s.groupObj.name)} materials \u2197</a>`);
     hero = `<div class="hero ${cur ? "live" : ""}">
-      <div class="eyebrow"><span class="dot"></span><span id="heroLabel">${cur ? "In class now" : "Next class"}</span><span style="margin-left:auto" class="mono">${when} \u00b7 ${esc(s.start)}\u2013${esc(s.end || "")}</span></div>
+      <div class="eyebrow"><span class="dot"></span><span id="heroLabel">${cur ? (meet ? "In a meeting now" : "In class now") : (meet ? "Next up: meeting" : "Next class")}</span><span style="margin-left:auto" class="mono">${when} \u00b7 ${esc(s.start)}\u2013${esc(s.end || "")}</span></div>
       <div class="hero-main">
         <div><div class="cd" id="cd"></div><div class="cd-sub" id="cdSub"></div></div>
-        <div class="room"><div class="label" style="color:var(--hero-muted)">Room</div><div class="r-code">${esc(r.room)}</div>${r.bld ? `<div class="r-bld">${esc(r.bld)}</div>` : ""}</div>
+        <div class="room"><div class="label" style="color:var(--hero-muted)">${meet ? "Where" : "Room"}</div><div class="r-code">${esc(r.room || (s.joinUrl ? "Online" : "TBC"))}</div>${r.bld ? `<div class="r-bld">${esc(r.bld)}</div>` : ""}</div>
       </div>
       ${cur ? `<div class="prog"><span id="prog"></span></div>` : ""}
       <div class="hero-course">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span><span class="kind" style="color:var(--hero-muted)">${esc(s.kind || "")}</span>${extraTag(s)}</div>
-        <h2>${esc(c.title)}</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span><span class="kind" style="color:var(--hero-muted)">${esc(s.kind || "")}</span>${extraTag(s)}${clashTag(s)}</div>
+        <h2>${esc(titleOf(s))}</h2>
         <div class="hero-meta">
           ${s.groupObj ? `<span>Group <b>${esc(s.groupObj.name)}</b></span>` : ""}
           <span>Week <b class="mono">${s.week}</b></span>
-          <span>${roleLabel(c.role)}</span>
+          <span>${meet ? "From your calendar" : roleLabel(c.role)}</span>
         </div>
         ${links.length ? `<div class="links">${links.join("")}</div>` : ""}
       </div>
@@ -490,7 +650,7 @@ function renderNext(now) {
     const r = splitRoom(s.location);
     return `<li class="${state}" style="--cc:var(--${s.course.color||"c1"})">
       <span class="t">${todays.length ? esc(s.start) : DAYS[dow(s.startAt)]}</span><span class="pin"></span>
-      <div class="w"><b>${esc(s.course.code)}</b> \u00b7 ${esc(r.room)}<div>${todays.length ? "" : esc(s.start) + " \u00b7 "}${esc(s.kind || "")}${s.groupObj ? " \u00b7 " + esc(s.groupObj.name) : ""}</div></div>
+      <div class="w"><b>${esc(isMeet(s) ? s.title : s.course.code)}</b>${r.room ? " \u00b7 " + esc(r.room) : ""}${clashTag(s)}<div>${todays.length ? "" : esc(s.start) + " \u00b7 "}${esc(s.kind || "")}${s.groupObj ? " \u00b7 " + esc(s.groupObj.name) : ""}</div></div>
       ${tag ? `<span class="tag ${state}">${tag}</span>` : `<span></span>`}
     </li>`;
   }).join("");
@@ -532,11 +692,12 @@ function slotHTML(s, now) {
       <span class="time">${esc(s.start)}\u2013${esc(s.end||"")}</span>
       ${statusBtn(c, s, past)}
     </div>
-    <div><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span> <span class="kind">${esc(s.kind||"")}</span>${extraTag(s)}</div>
-    <div class="slot-title">${esc(c.title)}</div>
+    <div><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span> <span class="kind">${esc(s.kind||"")}</span>${extraTag(s)}${clashTag(s)}</div>
+    <div class="slot-title">${esc(titleOf(s))}</div>
     ${s.groupObj ? `<div class="grp">${esc(s.groupObj.name)}${s.groupObj.topic ? " \u00b7 " + esc(s.groupObj.topic) : ""}</div>` : ""}
-    <div class="loc"><span class="muted">Room</span> <b>${esc(s.location || "TBC")}</b></div>
+    ${s.location || !isMeet(s) ? `<div class="loc"><span class="muted">${isMeet(s) ? "Where" : "Room"}</span> <b>${esc(s.location || "TBC")}</b></div>` : ""}
     <div class="links">
+      ${s.joinUrl ? `<a class="btn small ghost" href="${esc(safeUrl(s.joinUrl))}" target="_blank" rel="noopener">Join \u2197</a>` : ""}
       ${c.pageUrl ? `<a class="btn small ghost" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Course page \u2197</a>` : ""}
       ${s.groupObj && s.groupObj.link ? `<a class="btn small ghost" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">Group \u2197</a>` : ""}
     </div>
@@ -544,6 +705,7 @@ function slotHTML(s, now) {
 }
 
 function statusBtn(c, s, past) {
+  if (c.virtual) return `<span class="tag">Meeting</span>`;
   const st = s.status || "planned";
   const label = st === "planned" ? (past ? "Mark done" : "Planned") : st === "done" ? "Done" : "Cancelled";
   return `<button class="status" data-s="${st}" data-act="status" data-c="${esc(c.id)}" data-s-id="${esc(s.id)}" ${canWrite ? "" : "disabled"} title="${canWrite ? "Click to change: planned \u2192 done \u2192 cancelled" : ""}">${label}</button>`;
@@ -627,7 +789,8 @@ function renderCourses(now, cw) {
 }
 
 function renderOverview(now, cw) {
-  const all = allSessions();
+  // teaching hours only: imported meetings stay out of the term totals
+  const all = allSessions().filter(s => !s.course.virtual);
   const live = all.filter(s => s.status !== "cancelled");
   const doneL = live.filter(s => s.status === "done" || s.endAt < now);
   const pct = live.length ? Math.round(doneL.length / live.length * 100) : 0;
@@ -700,8 +863,8 @@ function renderAll(now, cw) {
       <td class="mono">${DAYS[dow(s.startAt)]} ${niceDate(s.startAt)}</td>
       <td class="mono">${esc(s.start)}\u2013${esc(s.end||"")}</td>
       <td><span class="code" style="--cc:var(--${s.course.color||"c1"})">${esc(s.course.code)}</span></td>
-      <td>${esc(s.kind||"")}${extraTag(s)}</td>
-      <td>${s.groupObj ? esc(s.groupObj.name) : "<span class='muted'>\u2014</span>"}</td>
+      <td>${esc(s.kind||"")}${extraTag(s)}${clashTag(s)}</td>
+      <td>${isMeet(s) ? esc(s.title) : s.groupObj ? esc(s.groupObj.name) : "<span class='muted'>\u2014</span>"}</td>
       <td><b>${esc(s.location || "TBC")}</b></td>
       <td class="mono">${fmtH(s.mins)}</td>
       <td>${statusBtn(s.course, s, past)}</td>
@@ -730,6 +893,7 @@ function renderAll(now, cw) {
       <div class="filters">
         <button class="chip" data-act="fc" data-v="all" aria-pressed="${filterCourse === "all"}">All courses</button>
         ${sortedCourses().map(c => `<button class="chip" data-act="fc" data-v="${esc(c.id)}" aria-pressed="${filterCourse === c.id}">${esc(c.code)}</button>`).join("")}
+        ${meetings.length ? `<button class="chip" data-act="fc" data-v="${MEET.id}" aria-pressed="${filterCourse === MEET.id}">Meetings</button>` : ""}
         <button class="chip" data-act="extras" aria-pressed="${extrasOnly}">Extras only</button>
       </div>
       <div class="filters">
@@ -972,6 +1136,64 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
 $("#addCourse").addEventListener("click", () => openEditor(null));
 $("#openTerm").addEventListener("click", openTerm);
 $("#openData").addEventListener("click", openData);
+
+// ---------- meetings calendar dialog ----------
+let clearArmed = false;
+function openCal() {
+  clearArmed = false;
+  const info = meetingsInfo;
+  const upcoming = meetings.filter(m => at(m.date, m.end) > new Date()).length;
+  $("#calDlg").innerHTML = `<div class="dlg">
+    <div class="dlg-head"><h2>Meetings calendar</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <p style="margin:0">Bring meetings from your email calendar into Tutor Desk. They appear in Next class, Today, the week board and All sessions, and any clash with a class is flagged.</p>
+      <div class="notice" style="display:block">
+        ${info ? `<b>${info.count} meetings</b> loaded from <span class="mono">${esc(info.file)}</span> on ${new Date(info.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}. ${upcoming} still to come.${info.allDay ? ` ${info.allDay} all-day events were skipped.` : ""}`
+               : "No meetings loaded yet."}
+      </div>
+      <label class="drop" id="drop" for="icsFile">
+        <b>Choose or drop your calendar file (.ics)</b>
+        <span class="hint">A new file replaces the meetings loaded before. Meetings stay on this device only; they are never uploaded.</span>
+        <input id="icsFile" type="file" accept=".ics,text/calendar" style="display:none">
+      </label>
+      <details>
+        <summary><b>How to get the file</b></summary>
+        <div class="hint" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+          <span><b>Outlook on the web (university email):</b> Settings \u2192 Calendar \u2192 Shared calendars \u2192 Publish a calendar \u2192 choose Calendar and "Can view all details" \u2192 Publish. Open the ICS link it gives you; your browser downloads the file.</span>
+          <span><b>Outlook desktop:</b> open Calendar \u2192 File \u2192 Save Calendar \u2192 More options: Date range "Specify dates", Detail "Full details" \u2192 Save.</span>
+          <span><b>Google Calendar:</b> Settings \u2192 Import &amp; export \u2192 Export, then unzip and use the .ics file.</span>
+          <span>Import a fresh file whenever your meetings change.</span>
+        </div>
+      </details>
+    </div>
+    <div class="dlg-foot">
+      ${meetings.length ? `<button class="btn danger" data-act="clear">Remove all meetings</button>` : "<span></span>"}
+      <div class="r"><button class="btn" data-act="close">Close</button></div>
+    </div></div>`;
+  $("#calDlg").showModal();
+}
+async function handleICS(file) {
+  if (!file) return;
+  try {
+    const info = importICS(await file.text(), file.name);
+    $("#calDlg").close(); viewWeek = null; render();
+    toast(`Loaded ${info.count} meetings`);
+  } catch (err) { toast(err && err.message ? err.message : "Couldn't read that file. Choose an .ics calendar file."); }
+}
+$("#openCal").addEventListener("click", openCal);
+$("#calDlg").addEventListener("change", e => { if (e.target.id === "icsFile") handleICS(e.target.files[0]); });
+$("#calDlg").addEventListener("dragover", e => { e.preventDefault(); const d = $("#drop"); if (d) d.classList.add("over"); });
+$("#calDlg").addEventListener("dragleave", () => { const d = $("#drop"); if (d) d.classList.remove("over"); });
+$("#calDlg").addEventListener("drop", e => { e.preventDefault(); handleICS(e.dataTransfer.files[0]); });
+$("#calDlg").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  if (b.dataset.act === "close") { $("#calDlg").close(); return; }
+  if (b.dataset.act === "clear") {
+    if (!clearArmed) { clearArmed = true; b.classList.add("armed"); b.textContent = "Click again to remove"; return; }
+    meetings = []; meetingsInfo = null; saveMeetings(); if (filterCourse === MEET.id) filterCourse = "all";
+    $("#calDlg").close(); render(); toast("Meetings removed");
+  }
+});
 $("#openMini").addEventListener("click", () => {
   const w = window.open(location.pathname + "#mini", "tutor-desk-mini", "popup,width=420,height=680");
   if (!w) { location.hash = "mini"; location.reload(); }
@@ -1000,6 +1222,7 @@ function applyBase(base, keepFrom) {
 }
 
 (async () => {
+  loadMeetings();
   let base = null, local = null;
   try { const r = await fetch("data.json", { cache: "no-cache" }); if (r.ok) base = await r.json(); } catch (e) {}
   try { local = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) {}

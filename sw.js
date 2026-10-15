@@ -1,6 +1,6 @@
 // Offline support: serve the app shell from cache, refresh it in the background.
 // data.json is fetched network-first so timetable updates arrive as soon as you're online.
-const CACHE = "tutor-desk-v1";
+const CACHE = "tutor-desk-v2";
 const SHELL = ["./", "index.html", "data.json", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
