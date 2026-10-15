@@ -1138,39 +1138,91 @@ $("#openTerm").addEventListener("click", openTerm);
 $("#openData").addEventListener("click", openData);
 
 // ---------- meetings calendar dialog ----------
+// Auto sync: the published Outlook calendar link is kept in this browser only and
+// read again on open, every 30 minutes, and whenever the app comes back to the front.
+const LINK_KEY = "tutor-desk-cal-link-v1";
+const SYNC_EVERY = 30 * 60 * 1000;
+let calLink = "", syncState = { at: null, error: "" }, syncing = false;
+try { const v = JSON.parse(localStorage.getItem(LINK_KEY) || "null"); if (v) { calLink = v.link || ""; syncState = v.state || syncState; } } catch (e) {}
+const saveLink = () => { try { localStorage.setItem(LINK_KEY, JSON.stringify({ link: calLink, state: syncState })); } catch (e) {} };
+const normLink = u => String(u || "").trim().replace(/^webcals?:\/\//i, "https://");
+
+async function syncCalendar(manual) {
+  if (!calLink || syncing) return;
+  syncing = true;
+  try {
+    const r = await fetch(calLink, { cache: "no-store", credentials: "omit" });
+    if (!r.ok) throw new Error(`The calendar link answered with error ${r.status}. Check that the calendar is still published.`);
+    const text = await r.text();
+    if (!/BEGIN:VCALENDAR/.test(text)) throw new Error("That link doesn't return a calendar. Use the ICS link (ending in .ics), not the HTML one.");
+    const info = importICS(text, "Outlook (auto sync)");
+    syncState = { at: new Date().toISOString(), error: "" };
+    if (manual) toast(`Synced ${info.count} meetings`);
+  } catch (err) {
+    const blocked = err instanceof TypeError;   // network/CORS refusal surfaces as a TypeError
+    syncState = { at: syncState.at, error: blocked ? "blocked" : (err.message || "Sync failed") };
+    if (manual) toast(blocked ? "Outlook didn't let the app read the link. See the note below." : syncState.error);
+  }
+  saveLink(); syncing = false;
+  if (!document.querySelector("dialog[open]")) render();
+  else if ($("#calDlg").open) openCal();
+}
+setInterval(() => syncCalendar(false), SYNC_EVERY);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && calLink && (!syncState.at || Date.now() - new Date(syncState.at) > 5 * 60 * 1000)) syncCalendar(false);
+});
+
 let clearArmed = false;
 function openCal() {
   clearArmed = false;
   const info = meetingsInfo;
   const upcoming = meetings.filter(m => at(m.date, m.end) > new Date()).length;
+  const when = d => new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  let status;
+  if (calLink && syncState.error === "blocked") status = `<b>Outlook blocked the automatic read.</b> Your calendar link is saved, but Outlook doesn't let other websites read it directly. Ask me in Claude to set up the relay so sync works; until then, use the file option below.`;
+  else if (calLink && syncState.error) status = `<b>Last sync failed:</b> ${esc(syncState.error)}`;
+  else if (calLink && syncState.at) status = `<b>Auto sync is on.</b> Last synced ${when(syncState.at)}: ${info ? info.count : 0} meetings, ${upcoming} still to come. Syncs every 30 minutes while the app is open.`;
+  else if (info) status = `<b>${info.count} meetings</b> loaded from <span class="mono">${esc(info.file)}</span> on ${when(info.at)}. ${upcoming} still to come.`;
+  else status = "No meetings loaded yet.";
   $("#calDlg").innerHTML = `<div class="dlg">
     <div class="dlg-head"><h2>Meetings calendar</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
     <div class="dlg-body">
-      <p style="margin:0">Bring meetings from your email calendar into Tutor Desk. They appear in Next class, Today, the week board and All sessions, and any clash with a class is flagged.</p>
-      <div class="notice" style="display:block">
-        ${info ? `<b>${info.count} meetings</b> loaded from <span class="mono">${esc(info.file)}</span> on ${new Date(info.at).toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}. ${upcoming} still to come.${info.allDay ? ` ${info.allDay} all-day events were skipped.` : ""}`
-               : "No meetings loaded yet."}
-      </div>
-      <label class="drop" id="drop" for="icsFile">
-        <b>Choose or drop your calendar file (.ics)</b>
-        <span class="hint">A new file replaces the meetings loaded before. Meetings stay on this device only; they are never uploaded.</span>
-        <input id="icsFile" type="file" accept=".ics,text/calendar" style="display:none">
-      </label>
-      <details>
-        <summary><b>How to get the file</b></summary>
-        <div class="hint" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
-          <span><b>Outlook on the web (university email):</b> Settings \u2192 Calendar \u2192 Shared calendars \u2192 Publish a calendar \u2192 choose Calendar and "Can view all details" \u2192 Publish. Open the ICS link it gives you; your browser downloads the file.</span>
-          <span><b>Outlook desktop:</b> open Calendar \u2192 File \u2192 Save Calendar \u2192 More options: Date range "Specify dates", Detail "Full details" \u2192 Save.</span>
-          <span><b>Google Calendar:</b> Settings \u2192 Import &amp; export \u2192 Export, then unzip and use the .ics file.</span>
-          <span>Import a fresh file whenever your meetings change.</span>
+      <p style="margin:0">Your Outlook meetings appear in Next class, Today, the week board and All sessions, and any clash with a class is flagged. They stay on this device only.</p>
+      <div class="notice" style="display:block">${status}</div>
+
+      <fieldset><legend>Automatic sync</legend>
+        <label class="field"><span class="label">Outlook calendar link (ICS)</span>
+          <input id="calLink" value="${esc(calLink)}" placeholder="https://outlook.office365.com/owa/calendar/.../calendar.ics" spellcheck="false"></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" data-act="saveLink">${calLink ? "Save and sync now" : "Turn on auto sync"}</button>
+          ${calLink ? `<button class="btn" data-act="unlink">Stop auto sync</button>` : ""}
         </div>
+        <details>
+          <summary><b>Where to find the link</b></summary>
+          <ol class="hint" style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px">
+            <li>Open Outlook in your browser and click the gear icon (Settings).</li>
+            <li>Go to Calendar \u2192 Shared calendars.</li>
+            <li>Under "Publish a calendar", choose <b>Calendar</b> and <b>Can view all details</b>, then click <b>Publish</b>.</li>
+            <li>Copy the <b>ICS</b> link (the one ending in .ics) and paste it above.</li>
+          </ol>
+          <p class="hint" style="margin:8px 0 0">Anyone who has this link can see your calendar, so keep it private. The app stores it only in this browser.</p>
+        </details>
+      </fieldset>
+
+      <details>
+        <summary><b>Or load a calendar file once</b></summary>
+        <label class="drop" id="drop" for="icsFile" style="margin-top:10px">
+          <b>Choose or drop a calendar file (.ics)</b>
+          <span class="hint">Replaces the meetings loaded before.</span>
+          <input id="icsFile" type="file" accept=".ics,text/calendar" style="display:none">
+        </label>
       </details>
     </div>
     <div class="dlg-foot">
       ${meetings.length ? `<button class="btn danger" data-act="clear">Remove all meetings</button>` : "<span></span>"}
       <div class="r"><button class="btn" data-act="close">Close</button></div>
     </div></div>`;
-  $("#calDlg").showModal();
+  if (!$("#calDlg").open) $("#calDlg").showModal();
 }
 async function handleICS(file) {
   if (!file) return;
@@ -1188,6 +1240,18 @@ $("#calDlg").addEventListener("drop", e => { e.preventDefault(); handleICS(e.dat
 $("#calDlg").addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   if (b.dataset.act === "close") { $("#calDlg").close(); return; }
+  if (b.dataset.act === "saveLink") {
+    const v = normLink($("#calLink").value);
+    if (!/^https:\/\/\S+$/i.test(v)) { toast("Paste the full ICS link, starting with https://"); return; }
+    calLink = v; syncState = { at: null, error: "" }; saveLink();
+    b.textContent = "Syncing\u2026"; b.disabled = true;
+    syncCalendar(true);
+    return;
+  }
+  if (b.dataset.act === "unlink") {
+    calLink = ""; syncState = { at: null, error: "" }; saveLink(); openCal(); toast("Auto sync stopped. Loaded meetings were kept.");
+    return;
+  }
   if (b.dataset.act === "clear") {
     if (!clearArmed) { clearArmed = true; b.classList.add("armed"); b.textContent = "Click again to remove"; return; }
     meetings = []; meetingsInfo = null; saveMeetings(); if (filterCourse === MEET.id) filterCourse = "all";
@@ -1238,6 +1302,7 @@ function applyBase(base, keepFrom) {
     applyBase(base, null);
   }
   loaded = true; viewWeek = null; render();
+  syncCalendar(false);
 })();
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
