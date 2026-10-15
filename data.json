@@ -1,0 +1,629 @@
+{
+ "version": 1,
+ "term": {
+  "name": "Semester 1, 2026/27",
+  "start": "2026-09-21",
+  "weeks": 12
+ },
+ "courses": [
+  {
+   "id": "bf114",
+   "code": "BF114",
+   "color": "c1",
+   "groups": [
+    {
+     "id": "g11",
+     "link": "",
+     "name": "ECON/11",
+     "topic": "Problem-solving tutorial - BF114-1-1/Tut/ECON/11"
+    },
+    {
+     "id": "g12",
+     "link": "",
+     "name": "ECON/12",
+     "topic": "Problem-solving tutorial - BF114-1-1/Tut/ECON/12"
+    },
+    {
+     "id": "g14",
+     "link": "",
+     "name": "ECON/14",
+     "topic": "Problem-solving tutorial - BF114-1-1/Tut/ECON/14"
+    },
+    {
+     "id": "g15",
+     "link": "",
+     "name": "ECON/15",
+     "topic": "Problem-solving tutorial - BF114-1-1/Tut/ECON/15"
+    },
+    {
+     "id": "g06",
+     "link": "",
+     "name": "ECON/06",
+     "topic": "Extra cover - BF114-1-1/Tut/ECON/06"
+    },
+    {
+     "id": "g13",
+     "link": "",
+     "name": "ECON/13",
+     "topic": "Extra cover - BF114-1-1/Tut/ECON/13"
+    }
+   ],
+   "links": [],
+   "pageUrl": "https://classes.myplace.strath.ac.uk/course/view.php?id=26501",
+   "role": "teach",
+   "sessions": [
+    {
+     "date": "2026-10-08",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w3",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-15",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w4",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-29",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w6",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-05",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w7",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-12",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w8",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-19",
+     "end": "14:00",
+     "group": "g11",
+     "id": "bf11-w9",
+     "kind": "Tutorial",
+     "location": "SW108 - Stenhouse Wing",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-08",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w3",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-15",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w4",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-29",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w6",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-05",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w7",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-12",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w8",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-19",
+     "end": "17:00",
+     "group": "g12",
+     "id": "bf12-w9",
+     "kind": "Tutorial",
+     "location": "GH643 - Graham Hills",
+     "start": "16:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-07",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w3",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-14",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w4",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-28",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w6",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-04",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w7",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-11",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w8",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-18",
+     "end": "15:00",
+     "group": "g14",
+     "id": "bf14-w9",
+     "kind": "Tutorial",
+     "location": "SW104 - Stenhouse Wing",
+     "start": "14:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-05",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w3",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-12",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w4",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-26",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w6",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-02",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w7",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-09",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w8",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-16",
+     "end": "14:00",
+     "group": "g15",
+     "id": "bf15-w9",
+     "kind": "Tutorial",
+     "location": "GH510 - Graham Hills",
+     "start": "13:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-13",
+     "end": "12:00",
+     "extra": true,
+     "group": "g06",
+     "id": "bfx06-w4",
+     "kind": "Tutorial",
+     "location": "SW107 - Stenhouse Wing",
+     "start": "11:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-13",
+     "end": "15:00",
+     "extra": true,
+     "group": "g13",
+     "id": "bfx13-w4",
+     "kind": "Tutorial",
+     "location": "GH512 - Graham Hills",
+     "start": "14:00",
+     "status": "done"
+    }
+   ],
+   "title": "Introduction to Economy and Business"
+  },
+  {
+   "id": "ec951",
+   "code": "EC951",
+   "color": "c2",
+   "groups": [
+    {
+     "id": "lab",
+     "link": "",
+     "name": "EC951-1-Lab",
+     "topic": "Computer lab"
+    }
+   ],
+   "links": [],
+   "pageUrl": "https://classes.myplace.strath.ac.uk/course/view.php?id=23254",
+   "role": "teach",
+   "sessions": [
+    {
+     "date": "2026-09-29",
+     "end": "17:00",
+     "group": "lab",
+     "id": "ec951-w2",
+     "kind": "Lab",
+     "location": "Library",
+     "start": "15:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-13",
+     "end": "17:00",
+     "group": "lab",
+     "id": "ec951-w4",
+     "kind": "Lab",
+     "location": "Library",
+     "start": "15:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-27",
+     "end": "17:00",
+     "group": "lab",
+     "id": "ec951-w6",
+     "kind": "Lab",
+     "location": "Library",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-10",
+     "end": "17:00",
+     "group": "lab",
+     "id": "ec951-w8",
+     "kind": "Lab",
+     "location": "Library",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-24",
+     "end": "17:00",
+     "group": "lab",
+     "id": "ec951-w10",
+     "kind": "Lab",
+     "location": "Library",
+     "start": "15:00",
+     "status": "planned"
+    }
+   ],
+   "title": "Economic Data Analysis"
+  },
+  {
+   "id": "mdp1",
+   "code": "MDP1",
+   "color": "c5",
+   "groups": [],
+   "links": [],
+   "pageUrl": "https://classes.myplace.strath.ac.uk/course/view.php?id=26505",
+   "role": "teach",
+   "sessions": [
+    {
+     "date": "2026-10-21",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp1-w5",
+     "kind": "Workshop",
+     "location": "JA505 - John Anderson",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-18",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp1-w9",
+     "kind": "Workshop",
+     "location": "JA505 - John Anderson",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-25",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp1-w10",
+     "kind": "Workshop",
+     "location": "JA505 - John Anderson",
+     "start": "11:00",
+     "status": "planned"
+    }
+   ],
+   "title": "Management Development Programme 1"
+  },
+  {
+   "id": "mdp2",
+   "code": "MDP2",
+   "color": "c6",
+   "groups": [],
+   "links": [],
+   "pageUrl": "https://classes.myplace.strath.ac.uk/course/view.php?id=26506",
+   "role": "teach",
+   "sessions": [
+    {
+     "date": "2026-10-16",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp2-w4",
+     "kind": "Workshop",
+     "location": "RC513 - Royal College",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-23",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp2-w5",
+     "kind": "Workshop",
+     "location": "RC513 - Royal College",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-06",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp2-w7",
+     "kind": "Workshop",
+     "location": "RC513 - Royal College",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-13",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp2-w8",
+     "kind": "Workshop",
+     "location": "RC513 - Royal College",
+     "start": "11:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-20",
+     "end": "13:00",
+     "group": "",
+     "id": "mdp2-w9",
+     "kind": "Workshop",
+     "location": "RC513 - Royal College",
+     "start": "11:00",
+     "status": "planned"
+    }
+   ],
+   "title": "Management Development Programme 2"
+  },
+  {
+   "id": "office-hours",
+   "code": "OH",
+   "color": "c3",
+   "groups": [],
+   "links": [],
+   "pageUrl": "",
+   "role": "teach",
+   "sessions": [
+    {
+     "date": "2026-09-30",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w2",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-07",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w3",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-14",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w4",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "done"
+    },
+    {
+     "date": "2026-10-21",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w5",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-10-28",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w6",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-04",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w7",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-11",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w8",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-18",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w9",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-11-25",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w10",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    },
+    {
+     "date": "2026-12-02",
+     "end": "16:00",
+     "group": "",
+     "id": "oh-w11",
+     "kind": "Office hours",
+     "location": "DW540 - Duncan Wing",
+     "start": "15:00",
+     "status": "planned"
+    }
+   ],
+   "title": "Office Hours (all courses)"
+  },
+  {
+   "id": "ec215",
+   "code": "EC215",
+   "color": "c4",
+   "groups": [],
+   "links": [],
+   "pageUrl": "",
+   "role": "invig",
+   "sessions": [
+    {
+     "date": "2026-10-22",
+     "end": "14:35",
+     "extra": true,
+     "group": "",
+     "id": "ec215-w5",
+     "kind": "Exam",
+     "location": "JA504 - John Anderson",
+     "start": "13:00",
+     "status": "planned"
+    }
+   ],
+   "title": "Macroeconomics"
+  }
+ ]
+}

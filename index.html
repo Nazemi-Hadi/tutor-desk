@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F1B33">
+<meta name="description" content="Tutor Desk: my Semester 1 teaching timetable, rooms, groups and next class.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Tutor Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a term planner - "next up" strip, then tabs for the week board, course cards, and the full session list. */
+:root{
+  --bg:#EEF0F3; --surface:#FFFFFF; --sunk:#F5F6F8; --ink:#111A2B; --muted:#596476; --line:#D9DDE4;
+  --accent:#1E3A9E; --accent-ink:#FFFFFF; --soft:#E4E9F5;
+  --hero:#0F1B33; --hero-ink:#F2F4F8; --hero-muted:#A6B1C6; --hero-line:#26365A; --live:#E9B44C;
+  --ok:#1C7F54; --ok-soft:#DDF1E7; --warn:#A8670F; --bad:#B93A33; --bad-soft:#F8E1DF;
+  --c1:#2B50D8; --c2:#0B8574; --c3:#B93A33; --c4:#A8670F; --c5:#7448C4; --c6:#C2477A;
+  --display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D131B; --surface:#151D28; --sunk:#111821; --ink:#E5EBF3; --muted:#93A0B2; --line:#263245;
+  --accent:#7E9BFF; --accent-ink:#0D131B; --soft:#1B2742;
+  --ok:#4CC28A; --ok-soft:#14302A; --warn:#E0A54A; --bad:#F07A71; --bad-soft:#3A1D1D;
+  --c1:#7E9BFF; --c2:#3CC4AE; --c3:#F07A71; --c4:#E0A54A; --c5:#B293F5; --c6:#EE86B0;
+  --hero:#18264A; --hero-ink:#F2F4F8; --hero-muted:#A9B5CC; --hero-line:#2C3D66; --live:#F0C063;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D131B; --surface:#151D28; --sunk:#111821; --ink:#E5EBF3; --muted:#93A0B2; --line:#263245;
+  --accent:#7E9BFF; --accent-ink:#0D131B; --soft:#1B2742;
+  --ok:#4CC28A; --ok-soft:#14302A; --warn:#E0A54A; --bad:#F07A71; --bad-soft:#3A1D1D;
+  --c1:#7E9BFF; --c2:#3CC4AE; --c3:#F07A71; --c4:#E0A54A; --c5:#B293F5; --c6:#EE86B0;
+  --hero:#18264A; --hero-ink:#F2F4F8; --hero-muted:#A9B5CC; --hero-line:#2C3D66; --live:#F0C063;
+  color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:20px 60px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.005em}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+/* header */
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.brand h1{font-size:30px}
+.brand .sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px;color:var(--muted)}
+.weekpill{font-family:var(--mono);font-size:13px;background:var(--ink);color:var(--bg);padding:2px 10px;border-radius:99px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 13px;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.danger.armed{background:var(--bad);color:var(--surface)}
+.btn[disabled]{opacity:.5;cursor:default}
+
+.notice{background:var(--soft);border-radius:var(--r);padding:10px 14px;font-size:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+
+/* next up */
+/* now panel: dark hero with the next class, today's timeline beside it */
+.now{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px}
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:16px;padding:26px 28px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.hero .eyebrow{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--hero-muted);font-weight:600}
+.hero .dot{width:8px;height:8px;border-radius:50%;background:var(--hero-muted)}
+.hero.live .dot{background:var(--live);box-shadow:0 0 0 4px color-mix(in srgb,var(--live) 25%,transparent);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px transparent}}
+.hero-main{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:end}
+.cd{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:clamp(44px,6vw,72px);line-height:.9;font-weight:500;letter-spacing:-.03em;white-space:nowrap}
+.cd small{font-family:var(--body);font-size:15px;letter-spacing:0;color:var(--hero-muted);font-weight:500;margin-left:6px}
+.cd-sub{font-size:13px;color:var(--hero-muted);margin-top:10px}
+.room{border-left:1px solid var(--hero-line);padding-left:28px;min-width:0}
+.room .r-code{font-family:var(--display);font-size:clamp(30px,3.6vw,42px);font-weight:600;line-height:1}
+.room .r-bld{color:var(--hero-muted);margin-top:6px;font-size:15px}
+.hero-course{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--hero-line);padding-top:16px}
+.hero-course h2{font-size:22px;font-weight:600}
+.hero-meta{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--hero-muted);font-size:14px}
+.hero-meta b{color:var(--hero-ink);font-weight:500}
+.hero .links{margin-top:4px}
+.hero .btn{background:transparent;color:var(--hero-ink);border-color:var(--hero-line)}
+.hero .btn:hover{border-color:var(--hero-muted)}
+.hero .btn.primary{background:var(--hero-ink);color:var(--hero);border-color:var(--hero-ink)}
+.hero .code{color:var(--hero)}
+.prog{height:4px;background:var(--hero-line);border-radius:99px;overflow:hidden}
+.prog span{display:block;height:100%;background:var(--live)}
+.today{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.today-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.today-head h3{font-size:18px}
+.clockface{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:52px 14px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line)}
+.tl li:first-child{border-top:0}
+.tl .t{font-family:var(--mono);font-size:13px;padding-top:1px}
+.tl .pin{width:10px;height:10px;border-radius:50%;border:2px solid var(--cc,var(--muted));margin-top:5px}
+.tl li.past{color:var(--muted)}
+.tl li.past .pin{background:var(--cc,var(--muted));opacity:.45}
+.tl li.cur .pin{background:var(--cc)}
+.tl .w{min-width:0}
+.tl .w b{font-weight:600}
+.tl .w div{font-size:13px;color:var(--muted)}
+.tag{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.cur{background:var(--accent);color:var(--accent-ink)}
+.tag.nxt{background:var(--soft);color:var(--accent)}
+.today-foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;padding:10px 14px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+
+/* week board */
+.weeknav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.weeknav h2{font-size:22px}
+.weeknav .range{color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(var(--days,5),minmax(0,1fr));gap:10px}
+.day{display:flex;flex-direction:column;gap:8px;min-width:0}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;padding:2px 4px;border-bottom:1px solid var(--line)}
+.dayhead b{font-family:var(--display);font-size:16px}
+.day.today .dayhead{border-color:var(--accent)}
+.day.today .dayhead b{color:var(--accent)}
+.empty-day{color:var(--muted);font-size:13px;padding:8px 4px}
+.slot{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.slot.done{opacity:.62}
+.slot.cancelled{opacity:.5}
+.slot.cancelled .slot-title{text-decoration:line-through}
+.slot .time{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.slot-title{font-weight:600;line-height:1.3}
+.slot .loc{font-size:13px;display:flex;gap:5px;align-items:baseline}
+.slot .grp{font-size:13px;color:var(--muted)}
+.code{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:500;padding:1px 7px;border-radius:5px;color:var(--surface);background:var(--cc,var(--accent));white-space:nowrap}
+.kind{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;color:var(--muted)}
+
+/* status pill */
+.status{border:1px solid var(--line);background:var(--sunk);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.status[data-s="done"]{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.status[data-s="cancelled"]{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.status[disabled]{cursor:default}
+
+/* courses */
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 12px;font-size:13px;cursor:pointer;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.courses{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.course{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.course-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.course h3{font-size:19px;margin-top:6px}
+.role{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:5px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.role.teach{color:var(--accent);border-color:var(--accent)}
+.role.invig{color:var(--warn);border-color:var(--warn)}
+.strip{display:grid;grid-template-columns:repeat(var(--w,12),minmax(0,1fr));gap:3px}
+.wk{height:30px;border-radius:5px;background:var(--sunk);border:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.wk.on{background:var(--cc);border-color:var(--cc);color:var(--surface);font-weight:500}
+.wk.on.past{opacity:.45}
+.wk.now{outline:2px solid var(--ink);outline-offset:1px}
+.strip-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.groups{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.groups li{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:7px 10px;background:var(--sunk);border-radius:8px;min-width:0}
+.groups li > div{min-width:0}
+.groups .gname{font-weight:600}
+.groups .gtopic{font-size:13px;color:var(--muted)}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.course-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;font-size:13px;color:var(--muted)}
+.example-tag{font-size:11px;font-weight:600;color:var(--warn);border:1px dashed var(--warn);border-radius:5px;padding:0 6px}
+
+/* table */
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--sunk)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.weekrow td{background:var(--sunk);font-family:var(--display);font-weight:700;font-size:14px;padding:7px 12px}
+tr.weekrow.current td{color:var(--accent)}
+tr.past td{color:var(--muted)}
+
+.sub-h{font-size:20px;margin:26px 0 12px}
+.termbar{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:flex-end;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+.termbar > div{display:flex;flex-direction:column;gap:4px}
+.termbar b{font-size:20px;font-family:var(--display)}
+.bar{height:8px;background:var(--sunk);border:1px solid var(--line);border-radius:99px;overflow:hidden;width:100%;min-width:60px}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.big{height:12px}
+td .bar{display:inline-block;width:90px;vertical-align:middle;margin-right:8px}
+.months{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.month{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.month.now{border-color:var(--accent)}
+.month-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.month-head h3{font-size:18px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpis > div{display:flex;flex-direction:column;gap:2px}
+.kpis b{font-size:18px}
+table.mini{min-width:0;font-size:13px}
+table.mini td{padding:5px 4px;border-bottom:1px solid var(--line)}
+tr.wrow{cursor:pointer}
+tr.wrow:hover td{background:var(--sunk)}
+tr.wrow.past td{color:var(--muted)}
+tr.wrow.current td{background:var(--soft)}
+.emptystate{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+
+/* dialogs */
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);padding:0;width:min(920px,calc(100vw - 24px));max-height:calc(100vh - 32px)}
+dialog::backdrop{background:rgba(10,15,25,.45)}
+.dlg{display:flex;flex-direction:column;max-height:calc(100vh - 34px)}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-head h2{font-size:20px}
+.dlg-body{padding:18px 20px;overflow:auto;display:flex;flex-direction:column;gap:20px}
+.dlg-foot{display:flex;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlg-foot .r{display:flex;gap:8px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field input,.field select,.field textarea,.rowed input,.rowed select{border:1px solid var(--line);background:var(--sunk);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
+.field textarea{min-height:200px;font-family:var(--mono);font-size:12.5px}
+.swatches{display:flex;gap:6px}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;background:var(--cc)}
+.sw[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--surface) inset}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+legend{font-family:var(--display);font-weight:700;padding:0 6px}
+.rowed{display:grid;gap:6px;align-items:center}
+.rowed.link{grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto}
+.rowed.group{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1.5fr) auto}
+.sesswrap{overflow-x:auto}
+.sess{display:grid;grid-template-columns:44px 140px 90px 90px 110px 130px minmax(140px,1fr) 64px 110px 34px;gap:6px;align-items:center;min-width:970px}
+.sess.head{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.recur{background:var(--sunk);border-radius:10px;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;align-items:end}
+.hint{font-size:12.5px;color:var(--muted)}
+.x{border:0;background:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:4px}
+.x:hover{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;z-index:50}
+
+@media (max-width:860px){
+  .board{grid-template-columns:1fr}
+  .day .empty-day{display:none}
+  .now{grid-template-columns:1fr}
+  .hero{padding:20px}
+  .hero-main{grid-template-columns:1fr;gap:16px}
+  .room{border-left:0;padding-left:0;border-top:1px solid var(--hero-line);padding-top:14px}
+}
+@media (max-width:420px){ .courses{grid-template-columns:1fr} .wrap{padding-inline:16px} .brand h1{font-size:26px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+body{margin:0}
+img{max-width:100%}
+/* mini window: only the next class and today's list */
+.mini-toggle #openFull{display:none}
+.mini .mini-toggle #openMini{display:none}
+.mini .mini-toggle #openFull{display:inline-flex}
+.mini #editActions,.mini .tabs,.mini #view,.mini #exampleNotice{display:none!important}
+.mini .wrap{padding-block:12px;padding-inline:12px;gap:12px}
+.mini header.top{align-items:center}
+.mini .brand h1{font-size:18px}
+.mini .brand .sub #todayLabel{display:none}
+.mini .now{grid-template-columns:1fr}
+.mini .hero{padding:18px;gap:14px}
+.mini .hero-main{grid-template-columns:1fr;gap:12px}
+.mini .room{border-left:0;padding-left:0;border-top:1px solid var(--hero-line);padding-top:12px}
+.mini .cd{font-size:52px}
+.mini .hero-course h2{font-size:18px}
+.mini .today{padding:14px 16px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Tutor Desk</h1>
+      <div class="sub"><span id="termName">Term</span><span class="weekpill" id="weekPill">Week &#x2013;</span><span id="todayLabel"></span></div>
+    </div>
+    <div class="actions mini-toggle">
+      <button class="btn" id="openMini" title="Open a small window that shows only the next class">Mini window</button>
+      <button class="btn" id="openFull">Full view</button>
+    </div>
+    <div class="actions" id="editActions">
+      <button class="btn primary" id="addCourse">+ Add course</button>
+      <button class="btn" id="openTerm">Term dates</button>
+      <button class="btn" id="openData">Import / export</button>
+    </div>
+  </header>
+
+  <div class="notice" id="storeNotice" hidden></div>
+  <div class="notice" id="exampleNotice" hidden><span>Courses marked <span class="example-tag">Example</span> are sample entries. Edit them with your real courses, or delete them.</span></div>
+
+  <section class="now" id="nextUp" aria-label="Next class and today"></section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-week" data-tab="week">This week</button>
+    <button class="tab" role="tab" id="tab-overview" data-tab="overview">Term overview</button>
+    <button class="tab" role="tab" id="tab-courses" data-tab="courses">Courses &amp; groups</button>
+    <button class="tab" role="tab" id="tab-all" data-tab="all">All sessions</button>
+  </nav>
+
+  <main id="view"></main>
+</div>
+
+<dialog id="courseDlg"></dialog>
+<dialog id="termDlg"></dialog>
+<dialog id="dataDlg"></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+const COLORS = ["c1","c2","c3","c4","c5","c6"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DAYS_LONG = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const KINDS = ["Tutorial","Lab","Lecture","Seminar","Workshop","Office hours","Exam","Other"];
+const ROLES = [["teach","Teaching"],["invig","Invigilating"],["study","Studying"]];
+const roleLabel = r => (ROLES.find(x => x[0] === r) || ROLES[0])[1];
+const STATUS = ["planned","done","cancelled"];
+const LS_KEY = "tutor-desk-app-v1";
+
+let db = null, canWrite = true, usingLocal = true, baseVersion = 0, loaded = false;
+const MINI = location.hash === "#mini";
+if (MINI) document.documentElement.classList.add("mini");
+let courses = [];
+let term = { name: "Semester 1, 2026/27", start: "2026-09-21", weeks: 12 };
+let tab = "week", viewWeek = null, filterCourse = "all", roleFilter = "all", groupBy = "week", extrasOnly = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rid = () => Math.random().toString(36).slice(2, 10);
+const safeUrl = u => { u = String(u || "").trim(); if (!u) return ""; if (!/^https?:\/\//i.test(u)) u = "https://" + u; return u; };
+const clone = o => JSON.parse(JSON.stringify(o));
+
+// ---------- dates ----------
+const parseD = s => { const [y,m,d] = String(s).split("-").map(Number); return new Date(y, (m||1)-1, d||1); };
+const fmtD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const dayDiff = (a, b) => Math.round((parseD(fmtD(b)) - parseD(fmtD(a))) / 864e5);
+const weekOfDate = d => Math.floor(dayDiff(parseD(term.start), d) / 7) + 1;
+const weekStart = w => addDays(parseD(term.start), (w-1)*7);
+const dow = d => (d.getDay() + 6) % 7; // Mon = 0
+const fmtH = m => { const h = Math.floor(m / 60), r = m % 60; return h && r ? `${h}h ${r}m` : h ? `${h}h` : `${r}m`; };
+const monthName = k => parseD(k + "-01").toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+const sumMins = l => l.reduce((a, s) => a + s.mins, 0);
+const extraTag = s => s.extra ? ` <span class="example-tag">Extra</span>` : "";
+const niceDate = d =>d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const at = (date, time) => { const d = parseD(date); const [h,m] = String(time||"00:00").split(":").map(Number); d.setHours(h||0, m||0, 0, 0); return d; };
+
+function parseWeeks(str, max) {
+  const out = new Set();
+  String(str).split(/[,\s]+/).filter(Boolean).forEach(part => {
+    const m = part.match(/^(\d+)(?:-(\d+))?$/);
+    if (!m) return;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    for (let w = Math.min(a,b); w <= Math.max(a,b); w++) if (w >= 1 && w <= max + 4) out.add(w);
+  });
+  return [...out].sort((a,b) => a-b);
+}
+
+// ---------- data ----------
+function allSessions() {
+  const list = [];
+  courses.forEach(c => (c.sessions || []).forEach(s => {
+    if (!s.date) return;
+    const g = (c.groups || []).find(g => g.id === s.group);
+    const startAt = at(s.date, s.start), endAt = at(s.date, s.end || s.start);
+    list.push({ ...s, course: c, groupObj: g, startAt, endAt, mins: Math.max(0, Math.round((endAt - startAt) / 60000)), week: weekOfDate(parseD(s.date)), month: s.date.slice(0, 7) });
+  }));
+  return list.sort((a,b) => a.startAt - b.startAt);
+}
+
+function sortedCourses() {
+  const rank = r => Math.max(0, ROLES.findIndex(x => x[0] === r));
+  return [...courses].sort((a,b) => rank(a.role) - rank(b.role) || String(a.code).localeCompare(b.code));
+}
+
+async function saveCourse(c) {
+  const i = courses.findIndex(x => x.id === c.id);
+  if (i >= 0) courses[i] = c; else courses.push(c);
+  if (usingLocal) { saveLocal(); render(); return; }
+  const { id, ...body } = c;
+  await db.collection("courses").doc(id).set(body);
+}
+async function removeCourse(id) {
+  courses = courses.filter(c => c.id !== id);
+  if (usingLocal) { saveLocal(); render(); return; }
+  await db.collection("courses").doc(id).delete();
+}
+async function saveTerm(t) {
+  term = t;
+  if (usingLocal) { saveLocal(); render(); return; }
+  await db.doc("settings/term").set(t);
+}
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ term, courses, baseVersion })); } catch (e) { toast("Couldn't save in this browser."); } }
+function loadLocal() { try { const v = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (v) { term = v.term || term; courses = v.courses || []; } } catch (e) {} }
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 2200); }
+function writeFailed(e) {
+  if (e && e.code === "invalid_argument") { canWrite = false; render(); toast("You can view this desk but not change it."); }
+  else toast("Couldn't save. Check your connection and try again.");
+}
+
+// ---------- render ----------
+function render() {
+  const now = new Date();
+  const cw = weekOfDate(now);
+  if (viewWeek === null) viewWeek = Math.min(Math.max(cw, 1), term.weeks);
+  $("#termName").textContent = term.name;
+  $("#weekPill").textContent = cw < 1 ? `Starts in ${1 - cw} wk` : cw > term.weeks ? "Term over" : `Week ${cw} of ${term.weeks}`;
+  $("#todayLabel").textContent = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  $("#editActions").hidden = !canWrite;
+  $("#exampleNotice").hidden = !courses.some(c => c.example);
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === tab));
+  renderNext(now);
+  if (!loaded) { $("#view").innerHTML = ""; return; }
+  if (!courses.length) return renderEmpty();
+  if (tab === "week") renderWeek(now, cw);
+  else if (tab === "overview") renderOverview(now, cw);
+  else if (tab === "courses") renderCourses(now, cw);
+  else renderAll(now, cw);
+}
+
+function renderEmpty() {
+  $("#view").innerHTML = `<div class="emptystate">
+    <h2>No courses yet</h2>
+    <p class="muted">Add each course you teach or study: its weeks, rooms, groups and the link to your course page.</p>
+    ${canWrite ? `<button class="btn primary" data-act="add">+ Add your first course</button>` : ""}
+  </div>`;
+}
+
+// ---------- now panel ----------
+let focus = null, focusKey = "";
+const splitRoom = loc => { const [r, ...b] = String(loc || "TBC").split(/ \u00b7 | - /); return { room: r, bld: b.join(" - ") }; };
+const pad = n => String(n).padStart(2, "0");
+const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+function countdown(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  if (s < 3600) return `${pad(m)}:${pad(sec)}<small>min</small>`;
+  if (s < 86400) return `${h}<small>h</small> ${pad(m)}<small>m</small>`;
+  return `${d}<small>${d === 1 ? "day" : "days"}</small> ${h}<small>h</small>`;
+}
+
+function renderNext(now) {
+  const el = $("#nextUp");
+  if (!loaded) { el.innerHTML = `<div class="hero"><div class="eyebrow"><span class="dot"></span>Loading timetable</div></div>`; return; }
+  const live = allSessions().filter(s => s.status !== "cancelled");
+  const cur = live.find(s => s.startAt <= now && s.endAt > now);
+  const nxt = live.find(s => s.startAt > now);
+  focus = cur || nxt || null;
+  focusKey = focus ? focus.course.id + focus.id + (cur ? "c" : "n") : "";
+
+  let hero;
+  if (!focus) {
+    hero = `<div class="hero"><div class="eyebrow"><span class="dot"></span>Nothing scheduled</div>
+      <h2 style="font-size:26px">No upcoming classes</h2><p class="cd-sub" style="margin:0">Add sessions to a course and the next one appears here.</p></div>`;
+  } else {
+    const s = focus, c = s.course, r = splitRoom(s.location);
+    const isToday = fmtD(s.startAt) === fmtD(now);
+    const when = isToday ? "Today" : fmtD(s.startAt) === fmtD(addDays(now, 1)) ? "Tomorrow" : `${DAYS_LONG[dow(s.startAt)]} ${niceDate(s.startAt)}`;
+    const links = [];
+    if (c.pageUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Open on Myplace \u2197</a>`);
+    if (s.groupObj && s.groupObj.link) links.push(`<a class="btn small" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">${esc(s.groupObj.name)} materials \u2197</a>`);
+    hero = `<div class="hero ${cur ? "live" : ""}">
+      <div class="eyebrow"><span class="dot"></span><span id="heroLabel">${cur ? "In class now" : "Next class"}</span><span style="margin-left:auto" class="mono">${when} \u00b7 ${esc(s.start)}\u2013${esc(s.end || "")}</span></div>
+      <div class="hero-main">
+        <div><div class="cd" id="cd"></div><div class="cd-sub" id="cdSub"></div></div>
+        <div class="room"><div class="label" style="color:var(--hero-muted)">Room</div><div class="r-code">${esc(r.room)}</div>${r.bld ? `<div class="r-bld">${esc(r.bld)}</div>` : ""}</div>
+      </div>
+      ${cur ? `<div class="prog"><span id="prog"></span></div>` : ""}
+      <div class="hero-course">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span><span class="kind" style="color:var(--hero-muted)">${esc(s.kind || "")}</span>${extraTag(s)}</div>
+        <h2>${esc(c.title)}</h2>
+        <div class="hero-meta">
+          ${s.groupObj ? `<span>Group <b>${esc(s.groupObj.name)}</b></span>` : ""}
+          <span>Week <b class="mono">${s.week}</b></span>
+          <span>${roleLabel(c.role)}</span>
+        </div>
+        ${links.length ? `<div class="links">${links.join("")}</div>` : ""}
+      </div>
+    </div>`;
+  }
+
+  // today timeline, or the next few if today is empty
+  const todays = live.filter(s => fmtD(s.startAt) === fmtD(now));
+  const items = todays.length ? todays : live.filter(s => s.startAt > now).slice(0, 4);
+  const tl = items.map(s => {
+    const state = s.endAt <= now ? "past" : s.startAt <= now ? "cur" : s === nxt ? "nxt" : "";
+    const tag = state === "past" ? "Done" : state === "cur" ? "Now" : state === "nxt" ? "Next" : "";
+    const r = splitRoom(s.location);
+    return `<li class="${state}" style="--cc:var(--${s.course.color||"c1"})">
+      <span class="t">${todays.length ? esc(s.start) : DAYS[dow(s.startAt)]}</span><span class="pin"></span>
+      <div class="w"><b>${esc(s.course.code)}</b> \u00b7 ${esc(r.room)}<div>${todays.length ? "" : esc(s.start) + " \u00b7 "}${esc(s.kind || "")}${s.groupObj ? " \u00b7 " + esc(s.groupObj.name) : ""}</div></div>
+      ${tag ? `<span class="tag ${state}">${tag}</span>` : `<span></span>`}
+    </li>`;
+  }).join("");
+  const wkLeft = live.filter(s => s.week === weekOfDate(now) && s.startAt > now).length;
+  const today = `<div class="today">
+    <div class="today-head"><h3>${todays.length ? "Today" : "No classes today"}</h3><span class="clockface" id="clockface">${hhmm(now)}</span></div>
+    ${todays.length ? "" : `<div class="label">Coming up</div>`}
+    <ul class="tl">${tl || `<li><span></span><span></span><div class="w muted">Nothing scheduled.</div><span></span></li>`}</ul>
+    <div class="today-foot"><span>${DAYS_LONG[dow(now)]} ${niceDate(now)}</span><span>${wkLeft} more this week</span></div>
+  </div>`;
+  el.innerHTML = hero + today;
+  tick();
+}
+
+function tick() {
+  const now = new Date();
+  const cf = $("#clockface"); if (cf) cf.textContent = hhmm(now);
+  if (!focus) return;
+  // the class started or ended since the last full render: rebuild
+  const isCur = focus.startAt <= now;
+  if (focus.endAt <= now || (isCur && !focusKey.endsWith("c"))) { render(); return; }
+  const cd = $("#cd"), sub = $("#cdSub");
+  if (!cd) return;
+  if (isCur) {
+    cd.innerHTML = countdown(focus.endAt - now);
+    sub.textContent = `left \u00b7 ends at ${focus.end}`;
+    const p = $("#prog"); if (p) p.style.width = `${Math.min(100, (now - focus.startAt) / (focus.endAt - focus.startAt) * 100)}%`;
+  } else {
+    cd.innerHTML = countdown(focus.startAt - now);
+    sub.textContent = `until it starts \u00b7 ${DAYS[dow(focus.startAt)]} ${hhmm(focus.startAt)}`;
+  }
+}
+
+function slotHTML(s, now) {
+  const c = s.course;
+  const past = s.endAt < now;
+  return `<div class="slot ${s.status === "done" ? "done" : ""} ${s.status === "cancelled" ? "cancelled" : ""}">
+    <div style="display:flex;justify-content:space-between;gap:6px;align-items:center">
+      <span class="time">${esc(s.start)}\u2013${esc(s.end||"")}</span>
+      ${statusBtn(c, s, past)}
+    </div>
+    <div><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span> <span class="kind">${esc(s.kind||"")}</span>${extraTag(s)}</div>
+    <div class="slot-title">${esc(c.title)}</div>
+    ${s.groupObj ? `<div class="grp">${esc(s.groupObj.name)}${s.groupObj.topic ? " \u00b7 " + esc(s.groupObj.topic) : ""}</div>` : ""}
+    <div class="loc"><span class="muted">Room</span> <b>${esc(s.location || "TBC")}</b></div>
+    <div class="links">
+      ${c.pageUrl ? `<a class="btn small ghost" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Course page \u2197</a>` : ""}
+      ${s.groupObj && s.groupObj.link ? `<a class="btn small ghost" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">Group \u2197</a>` : ""}
+    </div>
+  </div>`;
+}
+
+function statusBtn(c, s, past) {
+  const st = s.status || "planned";
+  const label = st === "planned" ? (past ? "Mark done" : "Planned") : st === "done" ? "Done" : "Cancelled";
+  return `<button class="status" data-s="${st}" data-act="status" data-c="${esc(c.id)}" data-s-id="${esc(s.id)}" ${canWrite ? "" : "disabled"} title="${canWrite ? "Click to change: planned \u2192 done \u2192 cancelled" : ""}">${label}</button>`;
+}
+
+function renderWeek(now, cw) {
+  const ws = weekStart(viewWeek);
+  const sess = allSessions().filter(s => s.week === viewWeek);
+  const weekend = sess.some(s => dow(s.startAt) > 4);
+  const nDays = weekend ? 7 : 5;
+  let cols = "";
+  for (let i = 0; i < nDays; i++) {
+    const d = addDays(ws, i);
+    const items = sess.filter(s => dow(s.startAt) === i);
+    const isToday = fmtD(d) === fmtD(now);
+    cols += `<div class="day ${isToday ? "today" : ""}">
+      <div class="dayhead"><b>${DAYS[i]}</b><span class="mono muted" style="font-size:12px">${niceDate(d)}</span></div>
+      ${items.length ? items.map(s => slotHTML(s, now)).join("") : `<div class="empty-day">Free</div>`}
+    </div>`;
+  }
+  const count = sess.filter(s => s.status !== "cancelled").length;
+  $("#view").innerHTML = `
+    <div class="weeknav">
+      <button class="btn small" data-act="wk" data-d="-1" aria-label="Previous week" ${viewWeek <= 1 ? "disabled" : ""}>\u2039</button>
+      <h2>Week ${viewWeek}</h2>
+      <button class="btn small" data-act="wk" data-d="1" aria-label="Next week" ${viewWeek >= term.weeks ? "disabled" : ""}>\u203a</button>
+      <span class="range">${niceDate(ws)} \u2013 ${niceDate(addDays(ws, 6))} \u00b7 ${count} session${count === 1 ? "" : "s"}</span>
+      ${viewWeek !== cw && cw >= 1 && cw <= term.weeks ? `<button class="btn small ghost" data-act="wkNow">Back to this week</button>` : ""}
+    </div>
+    <div class="board" style="--days:${nDays}">${cols}</div>`;
+}
+
+function renderCourses(now, cw) {
+  const list = sortedCourses().filter(c => roleFilter === "all" || c.role === roleFilter);
+  const cards = list.map(c => {
+    const ss = (c.sessions || []).filter(s => s.date && s.status !== "cancelled");
+    const weeks = new Map();
+    ss.forEach(s => { const w = weekOfDate(parseD(s.date)); weeks.set(w, (weeks.get(w) || 0) + 1); });
+    let strip = "";
+    for (let w = 1; w <= term.weeks; w++) {
+      const n = weeks.get(w);
+      strip += `<button class="wk ${n ? "on" : ""} ${w < cw ? "past" : ""} ${w === cw ? "now" : ""}" data-act="goWeek" data-w="${w}" title="Week ${w}${n ? `: ${n} session${n>1?"s":""}` : ": no sessions"}">${w}</button>`;
+    }
+    const upcoming = (c.sessions || []).filter(s => s.date && s.status !== "cancelled" && at(s.date, s.end || s.start) > now).length;
+    const done = (c.sessions || []).filter(s => s.status === "done").length;
+    const rooms = [...new Set(ss.map(s => s.location).filter(Boolean))];
+    return `<article class="course" style="--cc:var(--${c.color||"c1"})">
+      <div class="course-top">
+        <div style="min-width:0">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="code">${esc(c.code)}</span>${c.example ? `<span class="example-tag">Example</span>` : ""}</div>
+          <h3>${esc(c.title)}</h3>
+        </div>
+        <span class="role ${esc(c.role)}">${roleLabel(c.role)}</span>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:6px">Weeks I attend</div>
+        <div class="strip" style="--w:${term.weeks}">${strip}</div>
+        <div class="strip-legend"><span>${weeks.size} of ${term.weeks} weeks</span><span>${rooms.length ? "Rooms: " + rooms.map(esc).join(", ") : "No rooms yet"}</span></div>
+      </div>
+      ${(c.groups || []).length ? `<div><div class="label" style="margin-bottom:6px">Groups</div><ul class="groups">${c.groups.map(g => `
+        <li><div><div class="gname">${esc(g.name)}</div>${g.topic ? `<div class="gtopic">${esc(g.topic)}</div>` : ""}</div>
+        ${g.link ? `<a class="btn small ghost" href="${esc(safeUrl(g.link))}" target="_blank" rel="noopener">Open \u2197</a>` : ""}</li>`).join("")}</ul></div>` : ""}
+      ${(c.pageUrl || (c.links || []).length) ? `<div class="links">
+        ${c.pageUrl ? `<a class="btn small primary" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">My course page \u2197</a>` : ""}
+        ${(c.links || []).filter(l => l.url).map(l => `<a class="btn small" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || "Link")} \u2197</a>`).join("")}
+      </div>` : ""}
+      <div class="course-foot">
+        <span class="mono">${upcoming} upcoming \u00b7 ${done} done</span>
+        ${canWrite ? `<button class="btn small" data-act="edit" data-c="${esc(c.id)}">Edit course</button>` : ""}
+      </div>
+    </article>`;
+  }).join("");
+  $("#view").innerHTML = `
+    <div class="section-head">
+      <div class="filters">
+        ${[["all","All"], ...ROLES].filter(([v]) => v === "all" || courses.some(c => c.role === v)).map(([v,l]) => `<button class="chip" data-act="role" data-v="${v}" aria-pressed="${roleFilter === v}">${l}</button>`).join("")}
+      </div>
+      <span class="muted" style="font-size:13px">Tap a week number to open that week.</span>
+    </div>
+    <div class="courses">${cards || `<p class="muted">No courses in this filter.</p>`}</div>`;
+}
+
+function renderOverview(now, cw) {
+  const all = allSessions();
+  const live = all.filter(s => s.status !== "cancelled");
+  const doneL = live.filter(s => s.status === "done" || s.endAt < now);
+  const pct = live.length ? Math.round(doneL.length / live.length * 100) : 0;
+
+  // months
+  const months = [...new Set(live.map(s => s.month))].sort();
+  const monthCards = months.map(m => {
+    const ms = live.filter(s => s.month === m);
+    const md = ms.filter(s => s.status === "done" || s.endAt < now);
+    const byCourse = sortedCourses().map(c => ({ c, l: ms.filter(s => s.course.id === c.id) })).filter(x => x.l.length);
+    const isNow = m === fmtD(now).slice(0, 7);
+    return `<article class="month ${isNow ? "now" : ""}">
+      <div class="month-head"><h3>${monthName(m)}</h3>${isNow ? `<span class="weekpill">This month</span>` : ""}</div>
+      <div class="kpis">
+        <div><span class="label">Sessions</span><b class="mono">${ms.length}</b></div>
+        <div><span class="label">Hours</span><b class="mono">${fmtH(sumMins(ms))}</b></div>
+        <div><span class="label">Done</span><b class="mono">${fmtH(sumMins(md))}</b></div>
+      </div>
+      <table class="mini"><tbody>${byCourse.map(({ c, l }) => `<tr>
+        <td><span class="code" style="--cc:var(--${c.color||"c1"})">${esc(c.code)}</span></td>
+        <td class="mono">${l.length}\u00d7</td>
+        <td class="mono" style="text-align:right">${fmtH(sumMins(l))}</td></tr>`).join("")}</tbody></table>
+      <button class="btn small ghost" data-act="goMonth" data-m="${m}">See sessions \u2192</button>
+    </article>`;
+  }).join("");
+
+  // weeks 1..N
+  let maxM = 1;
+  const wk = [];
+  for (let w = 1; w <= term.weeks; w++) {
+    const l = live.filter(s => s.week === w); const m = sumMins(l); maxM = Math.max(maxM, m);
+    wk.push({ w, l, m, d: l.filter(s => s.status === "done" || s.endAt < now).length, x: l.filter(s => s.extra).length, c: all.filter(s => s.week === w && s.status === "cancelled").length });
+  }
+  const weekRows = wk.map(({ w, l, m, d, x, c }) => {
+    const ws = weekStart(w);
+    const codes = [...new Set(l.map(s => s.course.id))].map(id => courses.find(k => k.id === id)).filter(Boolean);
+    const state = w < cw ? "past" : w === cw ? "current" : "";
+    return `<tr class="wrow ${state}" data-act="goWeek" data-w="${w}" tabindex="0">
+      <td><b class="mono">W${w}</b>${w === cw ? ` <span class="weekpill">now</span>` : ""}</td>
+      <td class="mono">${niceDate(ws)} \u2013 ${niceDate(addDays(ws, 6))}</td>
+      <td>${codes.map(k => `<span class="code" style="--cc:var(--${k.color||"c1"})">${esc(k.code)}</span>`).join(" ") || `<span class="muted">No sessions</span>`}</td>
+      <td class="mono">${l.length}${x ? ` <span class="example-tag">+${x} extra</span>` : ""}${c ? ` <span class="muted">\u00b7 ${c} cancelled</span>` : ""}</td>
+      <td><div class="bar"><span style="width:${Math.round(m / maxM * 100)}%"></span></div><span class="mono">${m ? fmtH(m) : "\u2014"}</span></td>
+      <td class="mono">${l.length ? `${d}/${l.length}` : "\u2014"}</td>
+    </tr>`;
+  }).join("");
+
+  $("#view").innerHTML = `
+    <div class="termbar">
+      <div><span class="label">Term progress</span><b class="mono">${cw < 1 ? 0 : Math.min(cw, term.weeks)} / ${term.weeks} weeks</b></div>
+      <div><span class="label">Sessions done</span><b class="mono">${doneL.length} / ${live.length}</b></div>
+      <div><span class="label">Hours done</span><b class="mono">${fmtH(sumMins(doneL))} / ${fmtH(sumMins(live))}</b></div>
+      <div style="flex:1;min-width:180px"><div class="bar big"><span style="width:${pct}%"></span></div><span class="muted mono" style="font-size:12px">${pct}% of sessions complete</span></div>
+    </div>
+    <h2 class="sub-h">By month</h2>
+    <div class="months">${monthCards || `<p class="muted">No sessions yet.</p>`}</div>
+    <h2 class="sub-h">Week by week</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Week</th><th>Dates</th><th>Courses</th><th>Sessions</th><th>Hours</th><th>Done</th></tr></thead>
+      <tbody>${weekRows}</tbody>
+    </table></div>
+    <p class="hint">Click a week to open it. Cancelled sessions don't count towards hours.</p>`;
+}
+
+function renderAll(now, cw) {
+  const list = allSessions().filter(s => (filterCourse === "all" || s.course.id === filterCourse) && (!extrasOnly || s.extra));
+  const rowHTML = s => {
+    const past = s.endAt < now;
+    return `<tr class="${past ? "past" : ""}">
+      <td class="mono">${DAYS[dow(s.startAt)]} ${niceDate(s.startAt)}</td>
+      <td class="mono">${esc(s.start)}\u2013${esc(s.end||"")}</td>
+      <td><span class="code" style="--cc:var(--${s.course.color||"c1"})">${esc(s.course.code)}</span></td>
+      <td>${esc(s.kind||"")}${extraTag(s)}</td>
+      <td>${s.groupObj ? esc(s.groupObj.name) : "<span class='muted'>\u2014</span>"}</td>
+      <td><b>${esc(s.location || "TBC")}</b></td>
+      <td class="mono">${fmtH(s.mins)}</td>
+      <td>${statusBtn(s.course, s, past)}</td>
+    </tr>`;
+  };
+  const head = (label, items, current, sub) => {
+    const live = items.filter(s => s.status !== "cancelled");
+    return `<tr class="weekrow ${current ? "current" : ""}"><td colspan="8">${label} <span class="mono muted" style="font-weight:400;font-size:12px">\u00b7 ${sub ? sub + " \u00b7 " : ""}${live.length} session${live.length === 1 ? "" : "s"} \u00b7 ${fmtH(sumMins(live))}</span></td></tr>`;
+  };
+  let rows = "";
+  if (groupBy === "month") {
+    const months = [...new Set(list.map(s => s.month))].sort();
+    months.forEach(m => { const items = list.filter(s => s.month === m); rows += head(monthName(m), items, m === fmtD(now).slice(0, 7)) + items.map(rowHTML).join(""); });
+  } else {
+    const weeks = new Set(); for (let w = 1; w <= term.weeks; w++) weeks.add(w);
+    list.forEach(s => weeks.add(s.week));
+    [...weeks].sort((a, b) => a - b).forEach(w => {
+      const items = list.filter(s => s.week === w);
+      const label = w < 1 ? "Before term" : w > term.weeks ? `After term (week ${w})` : `Week ${w}`;
+      rows += head(label, items, w === cw, niceDate(weekStart(w)));
+      rows += items.length ? items.map(rowHTML).join("") : `<tr><td colspan="8" class="muted">No sessions this week</td></tr>`;
+    });
+  }
+  $("#view").innerHTML = `
+    <div class="section-head">
+      <div class="filters">
+        <button class="chip" data-act="fc" data-v="all" aria-pressed="${filterCourse === "all"}">All courses</button>
+        ${sortedCourses().map(c => `<button class="chip" data-act="fc" data-v="${esc(c.id)}" aria-pressed="${filterCourse === c.id}">${esc(c.code)}</button>`).join("")}
+        <button class="chip" data-act="extras" aria-pressed="${extrasOnly}">Extras only</button>
+      </div>
+      <div class="filters">
+        <span class="label" style="align-self:center">Group by</span>
+        <button class="chip" data-act="gb" data-v="week" aria-pressed="${groupBy === "week"}">Week</button>
+        <button class="chip" data-act="gb" data-v="month" aria-pressed="${groupBy === "month"}">Month</button>
+      </div>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Date</th><th>Time</th><th>Course</th><th>Type</th><th>Group</th><th>Location</th><th>Length</th><th>Status</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="8" class="muted">No sessions match.</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+// ---------- course editor ----------
+let draft = null, deleteArmed = false;
+
+function openEditor(id) {
+  const c = courses.find(x => x.id === id);
+  draft = c ? clone(c) : { id: rid(), code: "", title: "", role: "teach", color: COLORS[courses.length % COLORS.length], pageUrl: "", links: [], groups: [], sessions: [] };
+  draft.links = draft.links || []; draft.groups = draft.groups || []; draft.sessions = draft.sessions || [];
+  deleteArmed = false;
+  renderEditor(!c);
+  $("#courseDlg").showModal();
+}
+
+function renderEditor(isNew) {
+  const d = draft;
+  const groupOpts = sel => `<option value="">\u2014</option>` + d.groups.map(g => `<option value="${esc(g.id)}" ${g.id === sel ? "selected" : ""}>${esc(g.name || "Unnamed")}</option>`).join("");
+  const sess = [...d.sessions].sort((a,b) => (a.date + a.start).localeCompare(b.date + b.start));
+  $("#courseDlg").innerHTML = `<form class="dlg" id="courseForm" method="dialog">
+    <div class="dlg-head"><h2>${isNew ? "Add course" : "Edit " + esc(d.code || "course")}</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <label class="field"><span class="label">Course code</span><input id="f-code" data-f="code" value="${esc(d.code)}" placeholder="e.g. CS106" required></label>
+        <label class="field" style="grid-column:span 2"><span class="label">Course title</span><input id="f-title" data-f="title" value="${esc(d.title)}" placeholder="e.g. Computer Systems & Organisation"></label>
+        <label class="field"><span class="label">My role</span><select id="f-role" data-f="role">${ROLES.map(([v,l]) => `<option value="${v}" ${d.role === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+        <div class="field"><span class="label">Colour</span><div class="swatches">${COLORS.map(k => `<button type="button" class="sw" style="--cc:var(--${k})" data-act="color" data-v="${k}" aria-pressed="${d.color === k}" aria-label="Colour ${k}"></button>`).join("")}</div></div>
+        <label class="field" style="grid-column:1/-1"><span class="label">My course page (link to my page with class links and materials)</span><input id="f-page" data-f="pageUrl" value="${esc(d.pageUrl)}" placeholder="https://\u2026"></label>
+      </div>
+
+      <fieldset><legend>Groups</legend>
+        <span class="hint">Each tutorial or lab group you take, with its topic and a link to its own page if it has one.</span>
+        ${d.groups.map((g,i) => `<div class="rowed group">
+          <input id="g-name-${i}" data-g="${i}" data-k="name" value="${esc(g.name)}" placeholder="Group name, e.g. T03">
+          <input id="g-topic-${i}" data-g="${i}" data-k="topic" value="${esc(g.topic)}" placeholder="Topic or title">
+          <input id="g-link-${i}" data-g="${i}" data-k="link" value="${esc(g.link)}" placeholder="Link (optional)">
+          <button type="button" class="x" data-act="delGroup" data-i="${i}" aria-label="Remove group">\u00d7</button></div>`).join("")}
+        <div><button type="button" class="btn small" data-act="addGroup">+ Add group</button></div>
+      </fieldset>
+
+      <fieldset><legend>Other links</legend>
+        ${d.links.map((l,i) => `<div class="rowed link">
+          <input id="l-label-${i}" data-l="${i}" data-k="label" value="${esc(l.label)}" placeholder="Label, e.g. MyPlace">
+          <input id="l-url-${i}" data-l="${i}" data-k="url" value="${esc(l.url)}" placeholder="https://\u2026">
+          <button type="button" class="x" data-act="delLink" data-i="${i}" aria-label="Remove link">\u00d7</button></div>`).join("")}
+        <div><button type="button" class="btn small" data-act="addLink">+ Add link</button></div>
+      </fieldset>
+
+      <fieldset><legend>Sessions</legend>
+        <div class="recur">
+          <label class="field"><span class="label">Weeks</span><input id="r-weeks" value="1-11" placeholder="1-5, 7-11"></label>
+          <label class="field"><span class="label">Day</span><select id="r-day">${DAYS_LONG.slice(0,5).map((n,i) => `<option value="${i}">${n}</option>`).join("")}<option value="5">Saturday</option></select></label>
+          <label class="field"><span class="label">Start</span><input id="r-start" type="time" value="10:00"></label>
+          <label class="field"><span class="label">End</span><input id="r-end" type="time" value="11:00"></label>
+          <label class="field"><span class="label">Type</span><select id="r-kind">${KINDS.map(k => `<option>${k}</option>`).join("")}</select></label>
+          <label class="field"><span class="label">Group</span><select id="r-group">${groupOpts("")}</select></label>
+          <label class="field"><span class="label">Location</span><input id="r-loc" placeholder="Building & room"></label>
+          <button type="button" class="btn primary" data-act="genRecur">Add these weeks</button>
+        </div>
+        <span class="hint">Weeks count from term week 1 (${niceDate(parseD(term.start))}). Change a room for one week in the list below.</span>
+        <div class="sesswrap">
+          <div class="sess head"><span>Wk</span><span>Date</span><span>Start</span><span>End</span><span>Type</span><span>Group</span><span>Location</span><span></span><span>Status</span><span></span></div>
+          ${sess.map(s => { const i = d.sessions.indexOf(s); return `<div class="sess rowed">
+            <span class="mono muted">${s.date ? weekOfDate(parseD(s.date)) : "\u2013"}</span>
+            <input id="s-date-${s.id}" type="date" data-s="${i}" data-k="date" value="${esc(s.date)}">
+            <input id="s-start-${s.id}" type="time" data-s="${i}" data-k="start" value="${esc(s.start)}">
+            <input id="s-end-${s.id}" type="time" data-s="${i}" data-k="end" value="${esc(s.end)}">
+            <select id="s-kind-${s.id}" data-s="${i}" data-k="kind">${KINDS.map(k => `<option ${k === s.kind ? "selected" : ""}>${k}</option>`).join("")}</select>
+            <select id="s-group-${s.id}" data-s="${i}" data-k="group">${groupOpts(s.group)}</select>
+            <input id="s-loc-${s.id}" data-s="${i}" data-k="location" value="${esc(s.location)}" placeholder="Room">
+            <label class="hint" style="display:flex;gap:4px;align-items:center"><input id="s-extra-${s.id}" type="checkbox" data-s="${i}" data-k="extra" ${s.extra ? "checked" : ""} style="width:auto">Extra</label>
+            <select id="s-status-${s.id}" data-s="${i}" data-k="status">${STATUS.map(k => `<option value="${k}" ${k === (s.status||"planned") ? "selected" : ""}>${k[0].toUpperCase()+k.slice(1)}</option>`).join("")}</select>
+            <button type="button" class="x" data-act="delSess" data-i="${i}" aria-label="Remove session">\u00d7</button></div>`; }).join("")}
+        </div>
+        <div><button type="button" class="btn small" data-act="addSess">+ Add a single session</button></div>
+      </fieldset>
+    </div>
+    <div class="dlg-foot">
+      <div>${isNew ? "" : `<button type="button" class="btn danger ${deleteArmed ? "armed" : ""}" data-act="delCourse">${deleteArmed ? "Click again to delete" : "Delete course"}</button>`}</div>
+      <div class="r"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary">Save course</button></div>
+    </div>
+  </form>`;
+}
+
+$("#courseDlg").addEventListener("input", e => {
+  const t = e.target, d = draft; if (!d) return;
+  if (t.dataset.f) d[t.dataset.f] = t.value;
+  else if (t.dataset.g !== undefined) d.groups[+t.dataset.g][t.dataset.k] = t.value;
+  else if (t.dataset.l !== undefined) d.links[+t.dataset.l][t.dataset.k] = t.value;
+  else if (t.dataset.s !== undefined) d.sessions[+t.dataset.s][t.dataset.k] = t.type === "checkbox" ? t.checked : t.value;
+});
+$("#courseDlg").addEventListener("change", e => {
+  const t = e.target;
+  // re-render when a group name or a session date changes so dropdowns and week numbers stay current
+  if ((t.dataset.g !== undefined && t.dataset.k === "name") || (t.dataset.s !== undefined && t.dataset.k === "date")) renderEditor(!courses.some(c => c.id === draft.id));
+});
+$("#courseDlg").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const d = draft, act = b.dataset.act, isNew = !courses.some(c => c.id === d.id);
+  if (act === "close") { $("#courseDlg").close(); return; }
+  if (act === "color") d.color = b.dataset.v;
+  if (act === "addGroup") d.groups.push({ id: rid(), name: "", topic: "", link: "" });
+  if (act === "delGroup") { const g = d.groups.splice(+b.dataset.i, 1)[0]; d.sessions.forEach(s => { if (s.group === g.id) s.group = ""; }); }
+  if (act === "addLink") d.links.push({ label: "", url: "" });
+  if (act === "delLink") d.links.splice(+b.dataset.i, 1);
+  if (act === "delSess") d.sessions.splice(+b.dataset.i, 1);
+  if (act === "addSess") d.sessions.push({ id: rid(), date: fmtD(new Date()), start: "10:00", end: "11:00", kind: "Tutorial", group: "", location: "", status: "planned" });
+  if (act === "genRecur") {
+    const weeks = parseWeeks($("#r-weeks").value, term.weeks);
+    if (!weeks.length) { toast("Enter weeks like 1-5, 7-11"); return; }
+    const day = +$("#r-day").value;
+    weeks.forEach(w => d.sessions.push({ id: rid(), date: fmtD(addDays(weekStart(w), day)), start: $("#r-start").value, end: $("#r-end").value, kind: $("#r-kind").value, group: $("#r-group").value, location: $("#r-loc").value.trim(), status: "planned" }));
+    toast(`Added ${weeks.length} session${weeks.length > 1 ? "s" : ""}`);
+  }
+  if (act === "delCourse") {
+    if (!deleteArmed) { deleteArmed = true; }
+    else { try { await removeCourse(d.id); $("#courseDlg").close(); toast("Course deleted"); } catch (err) { writeFailed(err); } return; }
+  } else deleteArmed = false;
+  renderEditor(isNew);
+});
+$("#courseDlg").addEventListener("submit", async e => {
+  e.preventDefault();
+  const d = clone(draft);
+  if (!String(d.code).trim()) { toast("Add a course code first"); return; }
+  d.code = d.code.trim(); d.title = String(d.title || "").trim();
+  d.groups = d.groups.filter(g => g.name || g.topic || g.link);
+  d.links = d.links.filter(l => l.url);
+  d.sessions = d.sessions.filter(s => s.date);
+  d.updatedAt = new Date().toISOString();
+  try { await saveCourse(d); $("#courseDlg").close(); toast("Saved"); } catch (err) { writeFailed(err); }
+});
+
+// ---------- term dialog ----------
+function openTerm() {
+  $("#termDlg").innerHTML = `<form class="dlg" id="termForm" method="dialog">
+    <div class="dlg-head"><h2>Term dates</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <label class="field" style="grid-column:1/-1"><span class="label">Term name</span><input id="t-name" value="${esc(term.name)}"></label>
+        <label class="field"><span class="label">Monday of week 1</span><input id="t-start" type="date" value="${esc(term.start)}"></label>
+        <label class="field"><span class="label">Number of weeks</span><input id="t-weeks" type="number" min="1" max="30" value="${term.weeks}"></label>
+      </div>
+      <p class="hint">Week numbers on the dashboard count from this Monday. Check the date against the university's academic calendar. Changing it does not move sessions you already added; they keep their dates.</p>
+    </div>
+    <div class="dlg-foot"><span></span><div class="r"><button type="button" class="btn" data-act="close">Cancel</button><button class="btn primary" type="submit">Save</button></div></div>
+  </form>`;
+  $("#termDlg").showModal();
+}
+$("#termDlg").addEventListener("click", e => { if (e.target.closest("[data-act=close]")) $("#termDlg").close(); });
+$("#termDlg").addEventListener("submit", async e => {
+  e.preventDefault();
+  const start = $("#t-start").value;
+  if (!start) { toast("Pick the Monday of week 1"); return; }
+  const t = { name: $("#t-name").value.trim() || "Term", start, weeks: Math.max(1, Math.min(30, +$("#t-weeks").value || 12)) };
+  try { await saveTerm(t); viewWeek = null; $("#termDlg").close(); toast("Term saved"); render(); } catch (err) { writeFailed(err); }
+});
+
+// ---------- import / export ----------
+let importArmed = false;
+function openData() {
+  importArmed = false;
+  const data = JSON.stringify({ term, courses }, null, 2);
+  $("#dataDlg").innerHTML = `<div class="dlg">
+    <div class="dlg-head"><h2>Import / export</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <label class="field"><span class="label">All your data as JSON</span><textarea id="d-json" spellcheck="false">${esc(data)}</textarea></label>
+      <p class="hint">Copy this to keep a backup. To import, paste a backup here and choose Replace everything. Importing removes courses that aren't in the pasted data.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" data-act="copy">Copy JSON</button>
+      <div class="r"><button class="btn" data-act="close">Close</button><button class="btn danger" data-act="import" id="importBtn">Replace everything</button></div>
+    </div></div>`;
+  $("#dataDlg").showModal();
+}
+$("#dataDlg").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  if (b.dataset.act === "close") { $("#dataDlg").close(); return; }
+  if (b.dataset.act === "copy") {
+    const ta = $("#d-json");
+    try { await navigator.clipboard.writeText(ta.value); toast("Copied"); } catch (err) { ta.focus(); ta.select(); toast("Press Ctrl+C to copy"); }
+    return;
+  }
+  if (b.dataset.act === "import") {
+    let parsed;
+    try { parsed = JSON.parse($("#d-json").value); } catch (err) { toast("That isn't valid JSON"); return; }
+    if (!parsed || !Array.isArray(parsed.courses)) { toast("Expected an object with a courses list"); return; }
+    if (!importArmed) { importArmed = true; b.classList.add("armed"); b.textContent = "Click again to replace"; return; }
+    try {
+      if (parsed.term && parsed.term.start) await saveTerm({ name: parsed.term.name || "Term", start: parsed.term.start, weeks: +parsed.term.weeks || 12 });
+      const keep = new Set();
+      for (const c of parsed.courses) {
+        const cc = { links: [], groups: [], sessions: [], role: "teach", color: "c1", ...c, id: c.id || rid() };
+        cc.sessions = cc.sessions.map(s => ({ status: "planned", ...s, id: s.id || rid() }));
+        cc.groups = cc.groups.map(g => ({ ...g, id: g.id || rid() }));
+        keep.add(cc.id); await saveCourse(cc);
+      }
+      for (const c of [...courses]) if (!keep.has(c.id)) await removeCourse(c.id);
+      viewWeek = null; $("#dataDlg").close(); toast("Imported"); render();
+    } catch (err) { writeFailed(err); }
+  }
+});
+
+// ---------- page events ----------
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]");
+  if (!b || b.closest("dialog")) return;
+  const act = b.dataset.act;
+  if (act === "add") openEditor(null);
+  else if (act === "edit") openEditor(b.dataset.c);
+  else if (act === "wk") { viewWeek = Math.min(term.weeks, Math.max(1, viewWeek + +b.dataset.d)); render(); }
+  else if (act === "wkNow") { viewWeek = null; render(); }
+  else if (act === "goWeek") { viewWeek = +b.dataset.w; tab = "week"; remember(); render(); }
+  else if (act === "role") { roleFilter = b.dataset.v; render(); }
+  else if (act === "fc") { filterCourse = b.dataset.v; render(); }
+  else if (act === "extras") { extrasOnly = !extrasOnly; render(); }
+  else if (act === "gb") { groupBy = b.dataset.v; render(); }
+  else if (act === "goMonth") { groupBy = "month"; filterCourse = "all"; extrasOnly = false; tab = "all"; remember(); render();
+    const r = [...document.querySelectorAll("tr.weekrow")].find(t => t.textContent.startsWith(monthName(b.dataset.m))); if (r) r.scrollIntoView({ block: "start" }); }
+  else if (act === "status") {
+    if (!canWrite) return;
+    const c = courses.find(x => x.id === b.dataset.c); if (!c) return;
+    const nc = clone(c); const s = nc.sessions.find(x => x.id === b.dataset.sId); if (!s) return;
+    s.status = STATUS[(STATUS.indexOf(s.status || "planned") + 1) % STATUS.length];
+    try { await saveCourse(nc); } catch (err) { writeFailed(err); }
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("tr[data-act]")) e.target.click(); });
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { tab = t.dataset.tab; remember(); render(); }));
+$("#addCourse").addEventListener("click", () => openEditor(null));
+$("#openTerm").addEventListener("click", openTerm);
+$("#openData").addEventListener("click", openData);
+$("#openMini").addEventListener("click", () => {
+  const w = window.open(location.pathname + "#mini", "tutor-desk-mini", "popup,width=420,height=680");
+  if (!w) { location.hash = "mini"; location.reload(); }
+});
+$("#openFull").addEventListener("click", () => { location.hash = ""; location.reload(); });
+function remember() { try { localStorage.setItem("tutor-desk-tab", tab); } catch (e) {} }
+try { tab = localStorage.getItem("tutor-desk-tab") || "week"; } catch (e) {}
+if (/^#(week|overview|courses|all)$/.test(location.hash)) tab = location.hash.slice(1);
+
+// ---------- boot ----------
+render();
+setInterval(tick, 1000);
+// full refresh each minute so past/now states and the week view stay current
+setInterval(() => { if (!document.querySelector("dialog[open]")) render(); }, 60000);
+
+// Timetable comes from data.json; ticks and edits made in the app live in this browser
+// on top of it. A newer data.json (higher "version") is offered as an update that keeps
+// the Done/Cancelled marks.
+function applyBase(base, keepFrom) {
+  const marks = {};
+  (keepFrom || []).forEach(c => (c.sessions || []).forEach(s => { if (s.status && s.status !== "planned") marks[c.id + "/" + s.id] = s.status; }));
+  term = base.term || term;
+  courses = clone(base.courses || []);
+  courses.forEach(c => (c.sessions || []).forEach(s => { const m = marks[c.id + "/" + s.id]; if (m) s.status = m; }));
+  baseVersion = +base.version || 0;
+}
+
+(async () => {
+  let base = null, local = null;
+  try { const r = await fetch("data.json", { cache: "no-cache" }); if (r.ok) base = await r.json(); } catch (e) {}
+  try { local = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) {}
+  if (local && local.courses) {
+    term = local.term || term; courses = local.courses; baseVersion = +local.baseVersion || 0;
+    if (base && (+base.version || 0) > baseVersion) {
+      const n = $("#storeNotice");
+      n.innerHTML = `<span>A new timetable is available. Your Done and Cancelled marks will be kept.</span><button class="btn small primary" id="loadNew">Load new timetable</button>`;
+      n.hidden = false;
+      $("#loadNew").addEventListener("click", () => { applyBase(base, courses); saveLocal(); n.hidden = true; viewWeek = null; render(); toast("Timetable updated"); });
+    }
+  } else if (base) {
+    applyBase(base, null);
+  }
+  loaded = true; viewWeek = null; render();
+})();
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
