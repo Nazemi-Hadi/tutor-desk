@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -400,7 +400,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp1-w5",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "JA505 - John Anderson",
      "start": "11:00",
      "status": "planned"
@@ -410,7 +410,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp1-w9",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "JA505 - John Anderson",
      "start": "11:00",
      "status": "planned"
@@ -420,7 +420,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp1-w10",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "JA505 - John Anderson",
      "start": "11:00",
      "status": "planned"
@@ -442,7 +442,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp2-w4",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "RC513 - Royal College",
      "start": "11:00",
      "status": "planned"
@@ -452,7 +452,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp2-w5",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "RC513 - Royal College",
      "start": "11:00",
      "status": "planned"
@@ -462,7 +462,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp2-w7",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "RC513 - Royal College",
      "start": "11:00",
      "status": "planned"
@@ -472,7 +472,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp2-w8",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "RC513 - Royal College",
      "start": "11:00",
      "status": "planned"
@@ -482,7 +482,7 @@
      "end": "13:00",
      "group": "",
      "id": "mdp2-w9",
-     "kind": "Workshop",
+     "kind": "Tutorial",
      "location": "RC513 - Royal College",
      "start": "11:00",
      "status": "planned"

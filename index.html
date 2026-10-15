@@ -55,7 +55,19 @@ button,input,select,textarea{font:inherit;color:inherit}
 header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
 .brand h1{font-size:30px}
 .brand .sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px;color:var(--muted)}
-.weekpill{font-family:var(--mono);font-size:13px;background:var(--ink);color:var(--bg);padding:2px 10px;border-radius:99px}
+.weekpill{font-family:var(--mono);font-size:12px;background:var(--ink);color:var(--bg);padding:2px 10px;border-radius:99px}
+/* term week badge in the header: serif numeral, quiet "of 12", thin progress track */
+.termweek{display:inline-flex;align-items:center;gap:10px;padding:5px 12px 5px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.termweek .num{font-family:var(--display);font-weight:700;font-size:20px;line-height:1;min-width:32px;height:32px;display:grid;place-items:center;border-radius:7px;background:var(--accent);color:var(--accent-ink);font-variant-numeric:lining-nums}
+.termweek .txt{display:flex;flex-direction:column;gap:3px}
+.termweek .t1{font-family:var(--display);font-weight:600;font-size:15px;line-height:1;letter-spacing:.01em}
+.termweek .t1 span{color:var(--muted);font-weight:500;font-style:italic}
+.termweek .track{display:flex;gap:2px}
+.termweek .track i{width:7px;height:3px;border-radius:2px;background:var(--line)}
+.termweek .track i.on{background:var(--accent)}
+.termweek .track i.cur{background:var(--live)}
+.mini .termweek{padding:3px 8px 3px 4px}
+.mini .termweek .num{min-width:26px;height:26px;font-size:16px}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 .btn{border:1px solid var(--line);background:var(--surface);padding:7px 13px;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
 .btn:hover{border-color:var(--muted)}
@@ -248,6 +260,50 @@ legend{font-family:var(--display);font-weight:700;padding:0 6px}
 @media (max-width:420px){ .courses{grid-template-columns:1fr} .wrap{padding-inline:16px} .brand h1{font-size:26px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 body{margin:0}
+/* hourly calendar */
+.cal-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cal-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-nav h2{font-size:20px;margin-left:6px}
+.seg{display:flex;gap:4px}
+.cal-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.cal{--gut:58px;min-width:calc(var(--gut) + var(--n) * 120px)}
+.cal.day{min-width:0}
+.cal-head{display:grid;grid-template-columns:var(--gut) repeat(var(--n),minmax(0,1fr));border-bottom:1px solid var(--line);background:var(--surface)}
+.cal-dh{padding:8px 10px;display:flex;align-items:baseline;gap:8px;border-left:1px solid var(--line)}
+.cal-dh span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.cal-dh b{font-family:var(--display);font-size:22px;font-weight:600}
+.cal-dh.today b{background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:0 8px}
+.cal-dh.today span{color:var(--accent)}
+.cal-body{display:grid;grid-template-columns:var(--gut) repeat(var(--n),minmax(0,1fr));height:calc(var(--hours) * var(--hour))}
+.cal-gutter{display:flex;flex-direction:column}
+.cal-hr{height:var(--hour);position:relative}
+.cal-hr span{position:absolute;top:-8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cal-hr:first-child span{top:2px}
+.cal-col{position:relative;border-left:1px solid var(--line);cursor:copy;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px);
+  background-size:100% var(--hour),100% calc(var(--hour) / 2)}
+.cal-col.today{background-color:color-mix(in srgb,var(--soft) 45%,transparent)}
+.cal-col:hover{background-color:color-mix(in srgb,var(--soft) 35%,transparent)}
+.ev{position:absolute;display:flex;flex-direction:column;gap:1px;text-align:left;overflow:hidden;cursor:pointer;
+  padding:4px 7px;border-radius:6px;border:0;border-left:3px solid var(--cc);
+  background:color-mix(in srgb,var(--cc) 16%,var(--surface));color:var(--ink);font-size:12px;line-height:1.25;z-index:1}
+.ev:hover{background:color-mix(in srgb,var(--cc) 26%,var(--surface));z-index:2}
+.ev:focus-visible{z-index:2}
+.ev-t{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.ev-h{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-kind{font-weight:500;color:var(--muted)}
+.ev-s{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.short{flex-direction:row;align-items:center;gap:6px;padding-block:1px}
+.ev.past{opacity:.55}
+.ev.cancelled{opacity:.45}
+.ev.cancelled .ev-h{text-decoration:line-through}
+.ev.clash{box-shadow:inset 0 0 0 1.5px var(--bad)}
+.ev.mine{border-left-style:dashed}
+.cal-now{position:absolute;left:0;right:0;height:2px;background:var(--bad);z-index:2;pointer-events:none}
+.cal-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--bad)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+.facts dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding-top:2px}
+.facts dd{margin:0}
 .tag.clash{background:var(--bad-soft);color:var(--bad)}
 .drop{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;border:2px dashed var(--line);border-radius:12px;padding:26px 16px;cursor:pointer;background:var(--sunk)}
 .drop:hover,.drop.over{border-color:var(--accent);background:var(--soft)}
@@ -277,7 +333,7 @@ img{max-width:100%}
   <header class="top">
     <div class="brand">
       <h1>Tutor Desk</h1>
-      <div class="sub"><span id="termName">Term</span><span class="weekpill" id="weekPill">Week &#x2013;</span><span id="todayLabel"></span></div>
+      <div class="sub"><span id="termName">Term</span><span class="termweek" id="weekPill"></span><span id="todayLabel"></span></div>
     </div>
     <div class="actions mini-toggle">
       <button class="btn" id="openMini" title="Open a small window that shows only the next class">Mini window</button>
@@ -298,6 +354,7 @@ img{max-width:100%}
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-week" data-tab="week">This week</button>
+    <button class="tab" role="tab" id="tab-calendar" data-tab="calendar">Calendar</button>
     <button class="tab" role="tab" id="tab-overview" data-tab="overview">Term overview</button>
     <button class="tab" role="tab" id="tab-courses" data-tab="courses">Courses &amp; groups</button>
     <button class="tab" role="tab" id="tab-all" data-tab="all">All sessions</button>
@@ -310,6 +367,7 @@ img{max-width:100%}
 <dialog id="termDlg"></dialog>
 <dialog id="dataDlg"></dialog>
 <dialog id="calDlg"></dialog>
+<dialog id="evDlg"></dialog>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -364,12 +422,18 @@ function parseWeeks(str, max) {
 
 // ---------- data ----------
 // Meetings imported from an email calendar live in this browser only, shown as one virtual course.
-const MEET = { id: "__meet", code: "MEET", title: "Meetings", role: "meet", color: "c5", groups: [], links: [], pageUrl: "", virtual: true };
+const MEET = { id: "__meet", code: "Outlook", title: "Meetings", role: "meet", color: "c5", groups: [], links: [], pageUrl: "", virtual: true, tag: "Meeting", source: "From Outlook" };
+// Events you add yourself in the calendar (meetings, appointments, study time); this browser only.
+const MINE = { id: "__mine", code: "Personal", title: "Personal", role: "mine", color: "c6", groups: [], links: [], pageUrl: "", virtual: true, tag: "Personal", source: "Added by you" };
+const MINE_KEY = "tutor-desk-personal-v1";
+let personal = [];
+function loadPersonal() { try { const v = JSON.parse(localStorage.getItem(MINE_KEY) || "null"); if (Array.isArray(v)) personal = v; } catch (e) {} }
+function savePersonal() { try { localStorage.setItem(MINE_KEY, JSON.stringify(personal)); } catch (e) { toast("Couldn't save in this browser."); } }
 const MEET_KEY = "tutor-desk-meetings-v1";
 let meetings = [], meetingsInfo = null;
 function loadMeetings() { try { const v = JSON.parse(localStorage.getItem(MEET_KEY) || "null"); if (v) { meetings = v.events || []; meetingsInfo = v.info || null; } } catch (e) {} }
 function saveMeetings() { try { localStorage.setItem(MEET_KEY, JSON.stringify({ events: meetings, info: meetingsInfo })); } catch (e) { toast("Couldn't save meetings in this browser."); } }
-const isMeet = s => s.course && s.course.id === MEET.id;
+const isMeet = s => !!(s.course && s.course.virtual);
 const titleOf = s => s.title || s.course.title;
 
 function allSessions() {
@@ -382,6 +446,7 @@ function allSessions() {
   };
   courses.forEach(c => (c.sessions || []).forEach(s => add(c, s)));
   meetings.forEach(m => add(MEET, m));
+  personal.forEach(m => add(MINE, m));
   list.sort((a,b) => a.startAt - b.startAt);
   // clashes: any two live items that overlap in time
   const live = list.filter(s => s.status !== "cancelled");
@@ -532,7 +597,8 @@ function sortedCourses() {
   return [...courses].sort((a,b) => rank(a.role) - rank(b.role) || String(a.code).localeCompare(b.code));
 }
 
-async function saveCourse(c) {
+async function saveCourse(c, structural = true) {
+  if (structural) edited = true;
   const i = courses.findIndex(x => x.id === c.id);
   if (i >= 0) courses[i] = c; else courses.push(c);
   if (usingLocal) { saveLocal(); render(); return; }
@@ -540,16 +606,21 @@ async function saveCourse(c) {
   await db.collection("courses").doc(id).set(body);
 }
 async function removeCourse(id) {
+  edited = true;
   courses = courses.filter(c => c.id !== id);
   if (usingLocal) { saveLocal(); render(); return; }
   await db.collection("courses").doc(id).delete();
 }
 async function saveTerm(t) {
+  edited = true;
   term = t;
   if (usingLocal) { saveLocal(); render(); return; }
   await db.doc("settings/term").set(t);
 }
-function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ term, courses, baseVersion })); } catch (e) { toast("Couldn't save in this browser."); } }
+// edited: the timetable itself was changed in the app (not just ticks), so a newer
+// data.json is offered instead of applied automatically.
+let edited = false;
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ term, courses, baseVersion, edited })); } catch (e) { toast("Couldn't save in this browser."); } }
 function loadLocal() { try { const v = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (v) { term = v.term || term; courses = v.courses || []; } } catch (e) {} }
 
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 2200); }
@@ -564,7 +635,12 @@ function render() {
   const cw = weekOfDate(now);
   if (viewWeek === null) viewWeek = Math.min(Math.max(cw, 1), term.weeks);
   $("#termName").textContent = term.name;
-  $("#weekPill").textContent = cw < 1 ? `Starts in ${1 - cw} wk` : cw > term.weeks ? "Term over" : `Week ${cw} of ${term.weeks}`;
+  const inTerm = cw >= 1 && cw <= term.weeks;
+  const track = Array.from({ length: term.weeks }, (_, i) => `<i class="${i + 1 < cw ? "on" : i + 1 === cw ? "cur" : ""}"></i>`).join("");
+  $("#weekPill").innerHTML = inTerm
+    ? `<span class="num">${cw}</span><span class="txt"><span class="t1">Week ${cw} <span>of ${term.weeks}</span></span><span class="track" aria-hidden="true">${track}</span></span>`
+    : `<span class="txt"><span class="t1">${cw < 1 ? `Term starts in ${1 - cw} week${1 - cw === 1 ? "" : "s"}` : "Term over"}</span></span>`;
+  $("#weekPill").setAttribute("aria-label", inTerm ? `Week ${cw} of ${term.weeks}` : "");
   $("#todayLabel").textContent = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   $("#editActions").hidden = !canWrite;
   $("#exampleNotice").hidden = !courses.some(c => c.example);
@@ -573,6 +649,7 @@ function render() {
   if (!loaded) { $("#view").innerHTML = ""; return; }
   if (!courses.length) return renderEmpty();
   if (tab === "week") renderWeek(now, cw);
+  else if (tab === "calendar") renderCalendar(now);
   else if (tab === "overview") renderOverview(now, cw);
   else if (tab === "courses") renderCourses(now, cw);
   else renderAll(now, cw);
@@ -622,7 +699,7 @@ function renderNext(now) {
     if (c.pageUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Open on Myplace \u2197</a>`);
     if (s.groupObj && s.groupObj.link) links.push(`<a class="btn small" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">${esc(s.groupObj.name)} materials \u2197</a>`);
     hero = `<div class="hero ${cur ? "live" : ""}">
-      <div class="eyebrow"><span class="dot"></span><span id="heroLabel">${cur ? (meet ? "In a meeting now" : "In class now") : (meet ? "Next up: meeting" : "Next class")}</span><span style="margin-left:auto" class="mono">${when} \u00b7 ${esc(s.start)}\u2013${esc(s.end || "")}</span></div>
+      <div class="eyebrow"><span class="dot"></span><span id="heroLabel">${cur ? (meet ? "Happening now" : "In class now") : (meet ? "Next up" : "Next class")}</span><span style="margin-left:auto" class="mono">${when} \u00b7 ${esc(s.start)}\u2013${esc(s.end || "")}</span></div>
       <div class="hero-main">
         <div><div class="cd" id="cd"></div><div class="cd-sub" id="cdSub"></div></div>
         <div class="room"><div class="label" style="color:var(--hero-muted)">${meet ? "Where" : "Room"}</div><div class="r-code">${esc(r.room || (s.joinUrl ? "Online" : "TBC"))}</div>${r.bld ? `<div class="r-bld">${esc(r.bld)}</div>` : ""}</div>
@@ -634,7 +711,7 @@ function renderNext(now) {
         <div class="hero-meta">
           ${s.groupObj ? `<span>Group <b>${esc(s.groupObj.name)}</b></span>` : ""}
           <span>Week <b class="mono">${s.week}</b></span>
-          <span>${meet ? "From your calendar" : roleLabel(c.role)}</span>
+          <span>${meet ? c.source : roleLabel(c.role)}</span>
         </div>
         ${links.length ? `<div class="links">${links.join("")}</div>` : ""}
       </div>
@@ -705,7 +782,7 @@ function slotHTML(s, now) {
 }
 
 function statusBtn(c, s, past) {
-  if (c.virtual) return `<span class="tag">Meeting</span>`;
+  if (c.virtual) return `<span class="tag">${c.tag}</span>`;
   const st = s.status || "planned";
   const label = st === "planned" ? (past ? "Mark done" : "Planned") : st === "done" ? "Done" : "Cancelled";
   return `<button class="status" data-s="${st}" data-act="status" data-c="${esc(c.id)}" data-s-id="${esc(s.id)}" ${canWrite ? "" : "disabled"} title="${canWrite ? "Click to change: planned \u2192 done \u2192 cancelled" : ""}">${label}</button>`;
@@ -787,6 +864,181 @@ function renderCourses(now, cw) {
     </div>
     <div class="courses">${cards || `<p class="muted">No courses in this filter.</p>`}</div>`;
 }
+
+
+// ---------- hourly calendar (Outlook-style Day / Work week) ----------
+let calView = "week", calDate = null;
+try { calView = localStorage.getItem("tutor-desk-calview") === "day" ? "day" : "week"; } catch (e) {}
+const HOUR_PX = 56;
+const toMin = t => { const [h, m] = String(t || "0:0").split(":").map(Number); return (h || 0) * 60 + (m || 0); };
+const fromMin = m => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
+const calKey = s => s.course.id + "|" + s.id;
+
+function layoutDay(items) {
+  // place overlapping events side by side, like Outlook
+  const out = []; let cluster = [], clusterEnd = -1, cols = [];
+  const flush = () => { const n = cols.length || 1; cluster.forEach(x => { x.n = n; out.push(x); }); cluster = []; cols = []; };
+  items.slice().sort((a, b) => toMin(a.start) - toMin(b.start) || toMin(b.end) - toMin(a.end)).forEach(s => {
+    const st = toMin(s.start), en = Math.max(toMin(s.end || s.start), st + 15);
+    if (cluster.length && st >= clusterEnd) { flush(); clusterEnd = -1; }
+    let c = cols.findIndex(end => end <= st);
+    if (c < 0) { c = cols.length; cols.push(en); } else cols[c] = en;
+    cluster.push({ s, st, en, col: c });
+    clusterEnd = Math.max(clusterEnd, en);
+  });
+  flush();
+  return out;
+}
+
+function renderCalendar(now) {
+  if (!calDate) calDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let days;
+  const all = allSessions();
+  if (calView === "day") days = [calDate];
+  else {
+    const mon = addDays(calDate, -dow(calDate));
+    const weekend = all.some(s => { const d = dayDiff(mon, s.startAt); return d >= 5 && d <= 6; });
+    days = Array.from({ length: weekend ? 7 : 5 }, (_, i) => addDays(mon, i));
+  }
+  const byDay = days.map(d => all.filter(s => fmtD(s.startAt) === fmtD(d)));
+  const flat = byDay.flat();
+  let h0 = 8, h1 = 19;
+  flat.forEach(s => { h0 = Math.min(h0, Math.floor(toMin(s.start) / 60)); h1 = Math.max(h1, Math.ceil(toMin(s.end || s.start) / 60)); });
+  h0 = Math.max(0, h0); h1 = Math.min(24, Math.max(h1, h0 + 1));
+  const hours = h1 - h0;
+
+  const label = calView === "day"
+    ? calDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    : `${niceDate(days[0])} \u2013 ${niceDate(days[days.length - 1])} ${days[0].getFullYear()}`;
+  const wk = weekOfDate(days[0]);
+  const wkLabel = wk >= 1 && wk <= term.weeks ? `Week ${wk}` : "";
+
+  const gutter = Array.from({ length: hours }, (_, i) => `<div class="cal-hr"><span>${pad(h0 + i)}:00</span></div>`).join("");
+  const cols = days.map((d, di) => {
+    const isToday = fmtD(d) === fmtD(now);
+    const evs = layoutDay(byDay[di]).map(({ s, st, en, col, n }) => {
+      const top = (st - h0 * 60) / 60 * HOUR_PX, height = Math.max((en - st) / 60 * HOUR_PX - 2, 18);
+      const past = s.endAt < now, short = en - st < 45;
+      const r = splitRoom(s.location);
+      const head = isMeet(s) ? esc(s.title) : `${esc(s.course.code)} <span class="ev-kind">${esc(s.kind || "")}</span>`;
+      const sub = isMeet(s) ? (r.room ? esc(r.room) : "") : `${esc(r.room)}${s.groupObj ? " \u00b7 " + esc(s.groupObj.name) : ""}`;
+      return `<button class="ev ${past ? "past" : ""} ${s.status === "cancelled" ? "cancelled" : ""} ${s.clash ? "clash" : ""} ${short ? "short" : ""} ${s.course.id === MINE.id ? "mine" : ""}"
+        style="--cc:var(--${s.course.color || "c1"});top:${top}px;height:${height}px;left:calc(${col / n * 100}% + 2px);width:calc(${100 / n}% - 4px)"
+        data-act="calEvent" data-key="${esc(calKey(s))}" title="${esc(titleOf(s))} ${esc(s.start)}-${esc(s.end || "")}">
+        <span class="ev-t">${esc(s.start)}\u2013${esc(s.end || "")}</span>
+        <span class="ev-h">${head}</span>${sub && !short ? `<span class="ev-s">${sub}</span>` : ""}
+      </button>`;
+    }).join("");
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const nowLine = isToday && nowMin >= h0 * 60 && nowMin <= h1 * 60 ? `<div class="cal-now" style="top:${(nowMin - h0 * 60) / 60 * HOUR_PX}px"></div>` : "";
+    return `<div class="cal-col ${isToday ? "today" : ""}" data-act="calSlot" data-date="${fmtD(d)}" data-h0="${h0}">${evs}${nowLine}</div>`;
+  }).join("");
+  const heads = days.map(d => `<div class="cal-dh ${fmtD(d) === fmtD(now) ? "today" : ""}"><span>${DAYS[dow(d)]}</span><b>${d.getDate()}</b></div>`).join("");
+
+  $("#view").innerHTML = `
+    <div class="cal-bar">
+      <div class="cal-nav">
+        <button class="btn small" data-act="calToday">Today</button>
+        <button class="btn small" data-act="calNav" data-d="-1" aria-label="Previous">\u2039</button>
+        <button class="btn small" data-act="calNav" data-d="1" aria-label="Next">\u203a</button>
+        <h2>${label}</h2>${wkLabel ? `<span class="weekpill">${wkLabel}</span>` : ""}
+      </div>
+      <div class="cal-nav">
+        <div class="seg" role="group" aria-label="Calendar view">
+          <button class="chip" data-act="calView" data-v="day" aria-pressed="${calView === "day"}">Day</button>
+          <button class="chip" data-act="calView" data-v="week" aria-pressed="${calView === "week"}">Work week</button>
+        </div>
+        <button class="btn small primary" data-act="calNew">+ New event</button>
+      </div>
+    </div>
+    <div class="cal-wrap"><div class="cal ${calView}" style="--n:${days.length};--hour:${HOUR_PX}px;--hours:${hours}">
+      <div class="cal-head"><div></div>${heads}</div>
+      <div class="cal-body"><div class="cal-gutter">${gutter}</div>${cols}</div>
+    </div></div>
+    <p class="hint">Click an empty time to add your own event. Click any item to see its details.</p>`;
+}
+
+// ---------- event details / personal event editor ----------
+let evDraft = null, evDelArmed = false;
+const EV_KINDS = ["Meeting", "Appointment", "Study", "Personal", "Other"];
+function openEvent(key) {
+  const s = allSessions().find(x => calKey(x) === key);
+  if (!s) return;
+  if (s.course.id === MINE.id) return openPersonal(personal.find(p => p.id === s.id));
+  const c = s.course, r = splitRoom(s.location);
+  const links = [];
+  if (s.joinUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(s.joinUrl))}" target="_blank" rel="noopener">Join meeting \u2197</a>`);
+  if (c.pageUrl) links.push(`<a class="btn small primary" href="${esc(safeUrl(c.pageUrl))}" target="_blank" rel="noopener">Open on Myplace \u2197</a>`);
+  if (s.groupObj && s.groupObj.link) links.push(`<a class="btn small" href="${esc(safeUrl(s.groupObj.link))}" target="_blank" rel="noopener">${esc(s.groupObj.name)} materials \u2197</a>`);
+  const st = s.status || "planned";
+  $("#evDlg").innerHTML = `<div class="dlg">
+    <div class="dlg-head"><h2>${esc(titleOf(s))}</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="code" style="--cc:var(--${c.color || "c1"})">${esc(c.code)}</span><span class="kind">${esc(s.kind || "")}</span>${extraTag(s)}${clashTag(s)}</div>
+      <dl class="facts">
+        <dt>When</dt><dd>${DAYS_LONG[dow(s.startAt)]} ${niceDate(s.startAt)}, <span class="mono">${esc(s.start)}\u2013${esc(s.end || "")}</span> \u00b7 Week ${s.week}</dd>
+        <dt>${isMeet(s) ? "Where" : "Room"}</dt><dd>${esc(r.room || "TBC")}${r.bld ? ` \u00b7 ${esc(r.bld)}` : ""}</dd>
+        ${s.groupObj ? `<dt>Group</dt><dd>${esc(s.groupObj.name)}${s.groupObj.topic ? ` \u00b7 ${esc(s.groupObj.topic)}` : ""}</dd>` : ""}
+        <dt>Source</dt><dd>${c.virtual ? c.source : `${esc(c.title)} \u00b7 ${roleLabel(c.role)}`}</dd>
+        ${c.virtual ? "" : `<dt>Status</dt><dd>${st[0].toUpperCase() + st.slice(1)}</dd>`}
+      </dl>
+      ${links.length ? `<div class="links">${links.join("")}</div>` : ""}
+    </div>
+    <div class="dlg-foot"><span class="hint">${c.virtual ? "Change Outlook meetings in Outlook; they sync here." : "Edit classes from Courses &amp; groups."}</span><div class="r"><button class="btn" data-act="close">Close</button></div></div>
+  </div>`;
+  $("#evDlg").showModal();
+}
+
+function openPersonal(ev, preset) {
+  evDelArmed = false;
+  const isNew = !ev;
+  evDraft = ev ? clone(ev) : { id: rid(), title: "", kind: "Meeting", date: preset ? preset.date : fmtD(calDate || new Date()), start: preset ? preset.start : "10:00", end: preset ? preset.end : "11:00", location: "", joinUrl: "", notes: "", status: "planned" };
+  const d = evDraft;
+  $("#evDlg").innerHTML = `<form class="dlg" id="evForm" method="dialog">
+    <div class="dlg-head"><h2>${isNew ? "New event" : "Edit event"}</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <label class="field" style="grid-column:1/-1"><span class="label">Title</span><input id="e-title" value="${esc(d.title)}" placeholder="e.g. Meeting with supervisor" required></label>
+        <label class="field"><span class="label">Type</span><select id="e-kind">${EV_KINDS.map(k => `<option ${k === d.kind ? "selected" : ""}>${k}</option>`).join("")}</select></label>
+        <label class="field"><span class="label">Date</span><input id="e-date" type="date" value="${esc(d.date)}" required></label>
+        <label class="field"><span class="label">Start</span><input id="e-start" type="time" value="${esc(d.start)}" required></label>
+        <label class="field"><span class="label">End</span><input id="e-end" type="time" value="${esc(d.end)}" required></label>
+        <label class="field" style="grid-column:1/-1"><span class="label">Location</span><input id="e-loc" value="${esc(d.location)}" placeholder="Room, building or Online"></label>
+        <label class="field" style="grid-column:1/-1"><span class="label">Meeting link (optional)</span><input id="e-link" value="${esc(d.joinUrl)}" placeholder="https://teams.microsoft.com/..."></label>
+        <label class="field" style="grid-column:1/-1"><span class="label">Notes</span><textarea id="e-notes" style="min-height:70px;font-family:var(--body)">${esc(d.notes)}</textarea></label>
+      </div>
+      <p class="hint" style="margin:0">Your own events are saved on this device. Back them up with Import / export.</p>
+    </div>
+    <div class="dlg-foot">
+      <div>${isNew ? "" : `<button type="button" class="btn danger" data-act="evDelete">Delete event</button>`}</div>
+      <div class="r"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary">Save event</button></div>
+    </div>
+  </form>`;
+  if (!$("#evDlg").open) $("#evDlg").showModal();
+  setTimeout(() => { const t = $("#e-title"); if (t && isNew) t.focus(); }, 30);
+}
+
+$("#evDlg").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  if (b.dataset.act === "close") { $("#evDlg").close(); return; }
+  if (b.dataset.act === "evDelete") {
+    if (!evDelArmed) { evDelArmed = true; b.classList.add("armed"); b.textContent = "Click again to delete"; return; }
+    personal = personal.filter(p => p.id !== evDraft.id); savePersonal();
+    $("#evDlg").close(); render(); toast("Event deleted");
+  }
+});
+$("#evDlg").addEventListener("submit", e => {
+  e.preventDefault();
+  const d = { ...evDraft, title: $("#e-title").value.trim(), kind: $("#e-kind").value, date: $("#e-date").value, start: $("#e-start").value, end: $("#e-end").value,
+    location: $("#e-loc").value.trim(), joinUrl: $("#e-link").value.trim(), notes: $("#e-notes").value.trim() };
+  if (!d.title) { toast("Give the event a title"); return; }
+  if (!d.date || !d.start || !d.end) { toast("Pick a date, start and end time"); return; }
+  if (toMin(d.end) <= toMin(d.start)) { toast("The end time must be after the start time"); return; }
+  const i = personal.findIndex(p => p.id === d.id);
+  if (i >= 0) personal[i] = d; else personal.push(d);
+  savePersonal(); $("#evDlg").close();
+  calDate = parseD(d.date); render(); toast("Event saved");
+});
 
 function renderOverview(now, cw) {
   // teaching hours only: imported meetings stay out of the term totals
@@ -894,6 +1146,7 @@ function renderAll(now, cw) {
         <button class="chip" data-act="fc" data-v="all" aria-pressed="${filterCourse === "all"}">All courses</button>
         ${sortedCourses().map(c => `<button class="chip" data-act="fc" data-v="${esc(c.id)}" aria-pressed="${filterCourse === c.id}">${esc(c.code)}</button>`).join("")}
         ${meetings.length ? `<button class="chip" data-act="fc" data-v="${MEET.id}" aria-pressed="${filterCourse === MEET.id}">Meetings</button>` : ""}
+        ${personal.length ? `<button class="chip" data-act="fc" data-v="${MINE.id}" aria-pressed="${filterCourse === MINE.id}">Personal</button>` : ""}
         <button class="chip" data-act="extras" aria-pressed="${extrasOnly}">Extras only</button>
       </div>
       <div class="filters">
@@ -1066,7 +1319,7 @@ $("#termDlg").addEventListener("submit", async e => {
 let importArmed = false;
 function openData() {
   importArmed = false;
-  const data = JSON.stringify({ term, courses }, null, 2);
+  const data = JSON.stringify({ term, courses, personal }, null, 2);
   $("#dataDlg").innerHTML = `<div class="dlg">
     <div class="dlg-head"><h2>Import / export</h2><button type="button" class="x" data-act="close" aria-label="Close">\u00d7</button></div>
     <div class="dlg-body">
@@ -1093,6 +1346,7 @@ $("#dataDlg").addEventListener("click", async e => {
     if (!parsed || !Array.isArray(parsed.courses)) { toast("Expected an object with a courses list"); return; }
     if (!importArmed) { importArmed = true; b.classList.add("armed"); b.textContent = "Click again to replace"; return; }
     try {
+      if (Array.isArray(parsed.personal)) { personal = parsed.personal; savePersonal(); }
       if (parsed.term && parsed.term.start) await saveTerm({ name: parsed.term.name || "Term", start: parsed.term.start, weeks: +parsed.term.weeks || 12 });
       const keep = new Set();
       for (const c of parsed.courses) {
@@ -1119,6 +1373,16 @@ document.addEventListener("click", async e => {
   else if (act === "goWeek") { viewWeek = +b.dataset.w; tab = "week"; remember(); render(); }
   else if (act === "role") { roleFilter = b.dataset.v; render(); }
   else if (act === "fc") { filterCourse = b.dataset.v; render(); }
+  else if (act === "calNav") { const n = calView === "day" ? 1 : 7; calDate = addDays(calDate || new Date(), +b.dataset.d * n); render(); }
+  else if (act === "calToday") { calDate = null; render(); }
+  else if (act === "calView") { calView = b.dataset.v; try { localStorage.setItem("tutor-desk-calview", calView); } catch (err) {} render(); }
+  else if (act === "calNew") openPersonal(null, { date: fmtD(calDate || new Date()), start: "10:00", end: "11:00" });
+  else if (act === "calEvent") openEvent(b.dataset.key);
+  else if (act === "calSlot") {
+    const y = e.clientY - b.getBoundingClientRect().top;
+    const m = Math.max(0, Math.floor((+b.dataset.h0 * 60 + y / HOUR_PX * 60) / 30) * 30);
+    openPersonal(null, { date: b.dataset.date, start: fromMin(m), end: fromMin(Math.min(m + 60, 23 * 60 + 59)) });
+  }
   else if (act === "extras") { extrasOnly = !extrasOnly; render(); }
   else if (act === "gb") { groupBy = b.dataset.v; render(); }
   else if (act === "goMonth") { groupBy = "month"; filterCourse = "all"; extrasOnly = false; tab = "all"; remember(); render();
@@ -1128,7 +1392,7 @@ document.addEventListener("click", async e => {
     const c = courses.find(x => x.id === b.dataset.c); if (!c) return;
     const nc = clone(c); const s = nc.sessions.find(x => x.id === b.dataset.sId); if (!s) return;
     s.status = STATUS[(STATUS.indexOf(s.status || "planned") + 1) % STATUS.length];
-    try { await saveCourse(nc); } catch (err) { writeFailed(err); }
+    try { await saveCourse(nc, false); } catch (err) { writeFailed(err); }
   }
 });
 document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("tr[data-act]")) e.target.click(); });
@@ -1278,7 +1542,7 @@ $("#openMini").addEventListener("click", () => {
 $("#openFull").addEventListener("click", () => { location.hash = ""; location.reload(); });
 function remember() { try { localStorage.setItem("tutor-desk-tab", tab); } catch (e) {} }
 try { tab = localStorage.getItem("tutor-desk-tab") || "week"; } catch (e) {}
-if (/^#(week|overview|courses|all)$/.test(location.hash)) tab = location.hash.slice(1);
+if (/^#(week|calendar|overview|courses|all)$/.test(location.hash)) tab = location.hash.slice(1);
 
 // ---------- boot ----------
 render();
@@ -1299,17 +1563,19 @@ function applyBase(base, keepFrom) {
 }
 
 (async () => {
-  loadMeetings();
+  loadMeetings(); loadPersonal();
   let base = null, local = null;
   try { const r = await fetch("data.json", { cache: "no-cache" }); if (r.ok) base = await r.json(); } catch (e) {}
   try { local = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) {}
   if (local && local.courses) {
-    term = local.term || term; courses = local.courses; baseVersion = +local.baseVersion || 0;
-    if (base && (+base.version || 0) > baseVersion) {
+    term = local.term || term; courses = local.courses; baseVersion = +local.baseVersion || 0; edited = !!local.edited;
+    if (base && (+base.version || 0) > baseVersion && !edited) {
+      applyBase(base, courses); saveLocal(); setTimeout(() => toast("Timetable updated"), 400);
+    } else if (base && (+base.version || 0) > baseVersion) {
       const n = $("#storeNotice");
       n.innerHTML = `<span>A new timetable is available. Your Done and Cancelled marks will be kept.</span><button class="btn small primary" id="loadNew">Load new timetable</button>`;
       n.hidden = false;
-      $("#loadNew").addEventListener("click", () => { applyBase(base, courses); saveLocal(); n.hidden = true; viewWeek = null; render(); toast("Timetable updated"); });
+      $("#loadNew").addEventListener("click", () => { applyBase(base, courses); edited = false; saveLocal(); n.hidden = true; viewWeek = null; render(); toast("Timetable updated"); });
     }
   } else if (base) {
     applyBase(base, null);
