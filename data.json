@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -395,6 +395,17 @@
    "pageUrl": "https://classes.myplace.strath.ac.uk/course/view.php?id=26505",
    "role": "teach",
    "sessions": [
+    {
+     "id": "mdp1-x20261021",
+     "date": "2026-10-21",
+     "start": "09:00",
+     "end": "11:00",
+     "kind": "Tutorial",
+     "group": "",
+     "location": "RC546 - Royal College",
+     "status": "planned",
+     "extra": true
+    },
     {
      "date": "2026-10-21",
      "end": "13:00",
