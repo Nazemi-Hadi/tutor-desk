@@ -377,7 +377,7 @@ const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const DAYS_LONG = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const KINDS = ["Tutorial","Lab","Lecture","Seminar","Workshop","Office hours","Exam","Other"];
 const ROLES = [["teach","Teaching"],["invig","Invigilating"],["study","Studying"]];
-const roleLabel = r => (ROLES.find(x => x[0] === r) || ROLES[0])[1];
+const roleLabel = r => r === "meet" ? "Meeting" : (ROLES.find(x => x[0] === r) || ROLES[0])[1];
 const STATUS = ["planned","done","cancelled"];
 const LS_KEY = "tutor-desk-app-v1";
 
@@ -433,7 +433,7 @@ const MEET_KEY = "tutor-desk-meetings-v1";
 let meetings = [], meetingsInfo = null;
 function loadMeetings() { try { const v = JSON.parse(localStorage.getItem(MEET_KEY) || "null"); if (v) { meetings = v.events || []; meetingsInfo = v.info || null; } } catch (e) {} }
 function saveMeetings() { try { localStorage.setItem(MEET_KEY, JSON.stringify({ events: meetings, info: meetingsInfo })); } catch (e) { toast("Couldn't save meetings in this browser."); } }
-const isMeet = s => !!(s.course && s.course.virtual);
+const isMeet = s => !!(s.course && (s.course.virtual || s.course.role === "meet"));
 const titleOf = s => s.title || s.course.title;
 
 function allSessions() {
@@ -711,7 +711,7 @@ function renderNext(now) {
         <div class="hero-meta">
           ${s.groupObj ? `<span>Group <b>${esc(s.groupObj.name)}</b></span>` : ""}
           <span>Week <b class="mono">${s.week}</b></span>
-          <span>${meet ? c.source : roleLabel(c.role)}</span>
+          <span>${meet ? (c.source || "Meeting") : roleLabel(c.role)}</span>
         </div>
         ${links.length ? `<div class="links">${links.join("")}</div>` : ""}
       </div>
@@ -1042,7 +1042,7 @@ $("#evDlg").addEventListener("submit", e => {
 
 function renderOverview(now, cw) {
   // teaching hours only: imported meetings stay out of the term totals
-  const all = allSessions().filter(s => !s.course.virtual);
+  const all = allSessions().filter(s => !s.course.virtual && s.course.role !== "meet");
   const live = all.filter(s => s.status !== "cancelled");
   const doneL = live.filter(s => s.status === "done" || s.endAt < now);
   const pct = live.length ? Math.round(doneL.length / live.length * 100) : 0;

@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -635,6 +635,30 @@
     }
    ],
    "title": "Macroeconomics"
+  },
+  {
+   "id": "meetings",
+   "code": "Meeting",
+   "title": "Meetings",
+   "role": "meet",
+   "color": "c4",
+   "pageUrl": "",
+   "links": [],
+   "groups": [],
+   "sessions": [
+    {
+     "id": "meet-david-20261105",
+     "date": "2026-11-05",
+     "start": "15:00",
+     "end": "16:00",
+     "kind": "Meeting",
+     "title": "Extra meeting with David",
+     "group": "",
+     "location": "DW526 - Duncan Wing",
+     "status": "planned",
+     "extra": true
+    }
+   ]
   }
  ]
 }
