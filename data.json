@@ -1,5 +1,5 @@
 {
- "version": 4,
+ "version": 5,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -657,6 +657,163 @@
      "location": "DW526 - Duncan Wing",
      "status": "planned",
      "extra": true
+    }
+   ]
+  },
+  {
+   "id": "bf991",
+   "code": "BF991",
+   "title": "Research Philosophy",
+   "role": "study",
+   "color": "c7",
+   "pageUrl": "",
+   "links": [],
+   "groups": [
+    {
+     "id": "lecA",
+     "name": "Lec/A/01",
+     "topic": "BF991-1-1/Lec/A/01",
+     "link": ""
+    },
+    {
+     "id": "lecB",
+     "name": "Lec/B/01",
+     "topic": "BF991-1-1/Lec/B/01",
+     "link": ""
+    },
+    {
+     "id": "lecC",
+     "name": "Lec/C/01",
+     "topic": "BF991-1-1/Lec/C/01",
+     "link": ""
+    },
+    {
+     "id": "lecD",
+     "name": "Lec/D/01",
+     "topic": "BF991-1-1/Lec/D/01",
+     "link": ""
+    },
+    {
+     "id": "lecE",
+     "name": "Lec/E/01",
+     "topic": "BF991-1-1/Lec/E/01",
+     "link": ""
+    },
+    {
+     "id": "lecF",
+     "name": "Lec/F/01",
+     "topic": "BF991-1-1/Lec/F/01",
+     "link": ""
+    },
+    {
+     "id": "lecG",
+     "name": "Lec/G/01",
+     "topic": "BF991-1-1/Lec/G/01",
+     "link": ""
+    },
+    {
+     "id": "lecH",
+     "name": "Lec/H/01",
+     "topic": "BF991-1-1/Lec/H/01",
+     "link": ""
+    },
+    {
+     "id": "lecI",
+     "name": "Lec/I/01",
+     "topic": "BF991-1-1/Lec/I/01",
+     "link": ""
+    }
+   ],
+   "sessions": [
+    {
+     "id": "bf991-A",
+     "date": "2026-11-16",
+     "start": "10:00",
+     "end": "14:00",
+     "kind": "Lecture",
+     "group": "lecA",
+     "location": "DW307 - Duncan Wing",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-B",
+     "date": "2026-11-17",
+     "start": "10:00",
+     "end": "14:00",
+     "kind": "Lecture",
+     "group": "lecB",
+     "location": "DW307 - Duncan Wing",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-C",
+     "date": "2026-11-18",
+     "start": "10:00",
+     "end": "16:00",
+     "kind": "Lecture",
+     "group": "lecC",
+     "location": "JA502 - John Anderson",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-D",
+     "date": "2026-11-19",
+     "start": "10:00",
+     "end": "14:00",
+     "kind": "Lecture",
+     "group": "lecD",
+     "location": "DW307 - Duncan Wing",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-E",
+     "date": "2026-11-20",
+     "start": "10:00",
+     "end": "17:00",
+     "kind": "Lecture",
+     "group": "lecE",
+     "location": "DW307 - Duncan Wing",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-F",
+     "date": "2026-11-23",
+     "start": "14:00",
+     "end": "15:00",
+     "kind": "Lecture",
+     "group": "lecF",
+     "location": "GH703 - Graham Hills",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-G",
+     "date": "2026-11-24",
+     "start": "14:00",
+     "end": "15:00",
+     "kind": "Lecture",
+     "group": "lecG",
+     "location": "GH703 - Graham Hills",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-H",
+     "date": "2026-11-25",
+     "start": "15:00",
+     "end": "16:00",
+     "kind": "Lecture",
+     "group": "lecH",
+     "location": "GH702 - Graham Hills",
+     "status": "planned"
+    },
+    {
+     "id": "bf991-I",
+     "date": "2026-11-26",
+     "start": "15:00",
+     "end": "16:00",
+     "kind": "Lecture",
+     "group": "lecI",
+     "location": "GH702 - Graham Hills",
+     "status": "planned"
     }
    ]
   }
