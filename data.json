@@ -1,5 +1,5 @@
 {
- "version": 5,
+ "version": 6,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -655,6 +655,18 @@
      "title": "Extra meeting with David",
      "group": "",
      "location": "DW526 - Duncan Wing",
+     "status": "planned",
+     "extra": true
+    },
+    {
+     "id": "ws-mlai-11",
+     "date": "2026-11-26",
+     "start": "15:00",
+     "end": "16:00",
+     "kind": "Workshop",
+     "title": "Machine Learning/Artificial Intelligence Workshop 11",
+     "group": "",
+     "location": "TL328 (Jocelyn Bell) - Teaching and Learning Building",
      "status": "planned",
      "extra": true
     }
