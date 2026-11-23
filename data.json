@@ -1,5 +1,5 @@
 {
- "version": 6,
+ "version": 7,
  "term": {
   "name": "Semester 1, 2026/27",
   "start": "2026-09-21",
@@ -667,6 +667,18 @@
      "title": "Machine Learning/Artificial Intelligence Workshop 11",
      "group": "",
      "location": "TL328 (Jocelyn Bell) - Teaching and Learning Building",
+     "status": "planned",
+     "extra": true
+    },
+    {
+     "id": "pgr-pizza-20261202",
+     "date": "2026-12-02",
+     "start": "12:00",
+     "end": "14:00",
+     "kind": "Social",
+     "title": "PGR Pizza Social",
+     "group": "",
+     "location": "The DRUM, Level 1 PGR Area - Strathclyde Business School",
      "status": "planned",
      "extra": true
     }
